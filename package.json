@@ -1,0 +1,42 @@
+{
+  "name": "my-nextauth",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Template di autenticazione riusabile per Next.js 16 basato su Better Auth",
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "postinstall": "prisma generate",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "next typegen && tsc --noEmit",
+    "db:up": "docker compose up -d",
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "tsx prisma/seed.ts",
+    "test": "tsx --test scripts/unit/safe-redirect.test.ts scripts/unit/password-policy.test.ts scripts/unit/roles.test.ts",
+    "smoke": "tsx scripts/smoke.ts"
+  },
+  "dependencies": {
+    "@better-auth/prisma-adapter": "~1.7.7",
+    "@prisma/client": "^6.19.3",
+    "better-auth": "~1.7.7",
+    "next": "^16.4.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "server-only": "^0.0.1",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "dotenv": "^17.4.0",
+    "eslint": "^9",
+    "eslint-config-next": "^16.4.0",
+    "prisma": "^6.19.3",
+    "tailwindcss": "^4",
+    "tsx": "^4.21.0",
+    "typescript": "^5"
+  }
+}
