@@ -19,11 +19,24 @@ Pulizia tra un giro e l'altro: cancella gli utenti di test da Adminer (tabella `
 
 ## 0. Test automatici
 
-- [ ] **0.1** `npm run typecheck`: nessun errore.
-- [ ] **0.2** `npm run lint`: nessun errore.
-- [ ] **0.3** `npm test`: tutti i test passano.
-- [ ] **0.4** Avvia `AUTH_RATE_LIMIT=on npm run dev` e lancia `npm run smoke`: tutti gli step ✓. Fermalo e riavvia `npm run dev` normale per il resto del piano.
-- [ ] **0.5** `npm run build`: build completata.
+- [X] **0.1** `npm run typecheck`: nessun errore.
+- [X] **0.2** `npm run lint`: nessun errore.
+- [X] **0.3** `npm test`: tutti i test passano.
+- [C] **0.4** Imposta nel .env `AUTH_RATE_LIMIT="on"`, avvia il db `docker compose up -d` e popolalo con i dati seed `npm run db:seed`, quindi avvia l'applicazione `npm run dev` e lancia `npm run smoke`: tutti gli step ✓. Fermalo e riavvia `npm run dev` normale (`AUTH_RATE_LIMIT=""`) per il resto del piano.
+- [X] **0.5** `npm run build`: build completata.
+- [ ] **0.6** Con la white list accesa, lo smoke richiede 21 step ✓. In PowerShell, in un terminale con il dev server avviato così:
+
+  ```powershell
+  $env:AUTH_ALLOWLIST = "on"; $env:AUTH_RATE_LIMIT = "on"; npm run dev
+  ```
+
+  poi, in un secondo terminale, lancia lo smoke così:
+
+  ```powershell
+  $env:SMOKE_ALLOWLIST = "on"; npm run smoke; Remove-Item Env:SMOKE_ALLOWLIST
+  ```
+
+  Chiudi il dev server e riavvialo senza quelle variabili per il resto del piano. `VAR=valore comando` non funziona in PowerShell: usa `$env:VAR = "valore"`.
 
 ## A. Pagine pubbliche e redirect
 
@@ -144,6 +157,23 @@ Richiede `OIDC_*` configurate e il redirect URI `{BETTER_AUTH_URL}/api/auth/call
 
 ---
 
+## O. White list di email (`AUTH_ALLOWLIST=on`)
+
+Prerequisito: `AUTH_ADMIN_EMAILS` valorizzato, poi `AUTH_ALLOWLIST=on` e riavvio del dev server (comandi PowerShell in 0.6). Lo smoke con la white list accesa richiede `$env:SMOKE_ALLOWLIST = "on"` prima di `npm run smoke` (21 step); senza la variabile gira la suite base (17 step).
+
+- [ ] **O.1** Con la lista vuota, registrazione con un'email qualsiasi: messaggio "Questo indirizzo email non è autorizzato…" nel form, nessun utente creato in Adminer.
+- [ ] **O.2** Con la lista vuota, login dell'admin di bootstrap (`AUTH_ADMIN_EMAILS`): entra.
+- [ ] **O.3** Login dell'admin di seed (`admin@example.com`, ruolo ADMIN nel DB, non in `AUTH_ADMIN_EMAILS`): entra, perché gli admin del DB sono sempre ammessi.
+- [ ] **O.4** Da `/admin` apri "Email ammesse" e aggiungi `@tuodominio.it`: compare in tabella. Ripeti con una voce `mario@x.it` con nota.
+- [ ] **O.5** Voci malformate (`foo`, `@`, `a@b@c`, `@dominio`): errore nel form, nulla salvato. Un duplicato: "Questa voce è già in lista".
+- [ ] **O.6** Registrazione con un'email del dominio ammesso: va avanti come in B.4. Con un altro dominio: rifiutata come O.1.
+- [ ] **O.7** Google con un account fuori lista: arrivo su `/auth/error` con il messaggio italiano sulla white list.
+- [ ] **O.8** Un utente già registrato e verificato, poi rimosso dalla lista: il login email dà "non autorizzato". La sessione aperta in un altro browser viene revocata alla rimozione (reload → anonimo).
+- [ ] **O.9** Rimuovi una voce `@dominio` con un utente del dominio che ha un'altra voce singola: l'utente con la voce singola resta dentro, gli altri vengono revocati.
+- [ ] **O.10** Un utente ADMIN del dominio rimosso dalla lista: resta ammesso (il ruolo ADMIN protegge dalla revoca).
+- [ ] **O.11** Pagina "Email ammesse" con la funzione spenta: compare l'avviso "La white list non è attiva".
+- [ ] **O.12** Con la funzione spenta, registrazione e login da chiunque: comportamento identico a prima (`npm run smoke` senza `SMOKE_ALLOWLIST`, 17/17).
+
 ## Esiti
 
 | Sezione | Data | Esito (OK / KO / n.a.) | Note |
@@ -163,5 +193,6 @@ Richiede `OIDC_*` configurate e il redirect URI `{BETTER_AUTH_URL}/api/auth/call
 | L. Email reali | | | |
 | M. Produzione | | | |
 | N. Adozione | | | |
+| O. White list | | | |
 
-Il template è **funzionante** quando le sezioni 0 e A–K sono OK. L, M ed N vanno completate prima del primo progetto in produzione.
+Il template è **funzionante** quando le sezioni 0 e A–K sono OK. La sezione O è richiesta se la white list viene usata (altrimenti n.a.). L, M ed N vanno completate prima del primo progetto in produzione.

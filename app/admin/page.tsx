@@ -1,3 +1,4 @@
+import Link from "next/link";
 import AuthGate from "@/components/auth/AuthGate";
 import SiteHeader from "@/components/demo/SiteHeader";
 import { ADMIN_ROLES, ROLES } from "@/lib/auth/config";
@@ -26,7 +27,12 @@ async function UsersTable({ meId }: { meId: string }) {
 
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-6">
-      <h1 className="text-2xl font-semibold">Utenti</h1>
+      <div className="flex items-baseline justify-between">
+        <h1 className="text-2xl font-semibold">Utenti</h1>
+        <Link href="/admin/allowed-emails" className="text-sm font-medium text-blue-600 hover:underline">
+          Email ammesse →
+        </Link>
+      </div>
       <div className="mt-4 overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-slate-200 text-slate-500">

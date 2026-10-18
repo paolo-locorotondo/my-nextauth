@@ -119,6 +119,8 @@ export const texts = {
     SESSION_EXPIRED: "Sessione scaduta: accedi di nuovo.",
     TOO_MANY_REQUESTS: "Troppi tentativi. Riprova tra qualche minuto.",
     INVALID_CALLBACK_URL: "Indirizzo di ritorno non valido.",
+    EMAIL_NOT_ALLOWED: "Questo indirizzo email non è autorizzato ad accedere. Contatta l'amministratore.",
+    email_not_allowed: "Questo indirizzo email non è autorizzato ad accedere. Contatta l'amministratore.",
     INVALID_ORIGIN: "Richiesta non valida (origine non consentita).",
     account_not_linked:
       "Esiste già un account con questa email non ancora verificato. Accedi con email e password, verifica l'indirizzo e riprova.",

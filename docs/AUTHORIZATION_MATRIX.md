@@ -48,8 +48,11 @@ Ruoli (in `ROLES` di `lib/auth/config.ts`):
 | `GET /api/demo/me` | 401 | ✅ (`allowPending`) | ✅ | ✅ |
 | `GET /api/demo/admin` | 401 | 🔒 | 🔒 | ✅ |
 
+Con `AUTH_ALLOWLIST=on` registrazione e login sono limitati alla white list (vedi INTEGRATION §16): un'email fuori lista non arriva a nessuna delle rotte sopra. Gli admin in `AUTH_ADMIN_EMAILS` e nel DB sono sempre ammessi.
+
 ## Server action
 
 | Action | GUEST | NUOVO | USER | ADMIN |
 |---|---|---|---|---|
 | `setUserRole` (`app/admin/actions.ts`) | AuthError | AuthError | AuthError | ✅ (non sul proprio utente) |
+| `addAllowedEmail`, `removeAllowedEmail` (`app/admin/allowed-emails/actions.ts`) | AuthError | AuthError | AuthError | ✅ |

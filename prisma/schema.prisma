@@ -87,6 +87,17 @@ model Verification {
   @@map("verification")
 }
 
+// ── APP: white list di email (AUTH_ALLOWLIST=on, vedi lib/auth/allowlist.ts) ──
+// pattern = email esatta ("mario@x.it") oppure dominio ("@azienda.it"), minuscolo.
+model AllowedEmail {
+  id        String   @id @default(cuid())
+  pattern   String   @unique
+  note      String?
+  createdAt DateTime @default(now())
+
+  @@map("allowed_email")
+}
+
 // Usato dal rate limiter con storage "database" (vedi rateLimit in server.ts)
 model RateLimit {
   id          String @id

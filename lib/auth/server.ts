@@ -6,6 +6,7 @@ import { APIError, createAuthMiddleware } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
 import { genericOAuth } from "better-auth/plugins";
 import { prisma } from "@/lib/db";
+import { isEmailAllowed } from "./allowlist";
 import { AUTH_ROUTES, DEFAULT_ROLE, PASSWORD_POLICY, ROLES } from "./config";
 import { sendAuthEmail } from "./email";
 import { env, providers } from "./env";
@@ -96,6 +97,11 @@ export const auth = betterAuth({
         input: false,
       },
     },
+    // White list (AUTH_ALLOWLIST): gate su create-user, link-account e sign-in di Google/OIDC
+    validateUserInfo: async ({ user }) => {
+      if (await isEmailAllowed(user.email ?? "")) return;
+      return { error: "email_not_allowed", errorDescription: texts.errors.email_not_allowed };
+    },
   },
 
   databaseHooks: {
@@ -107,15 +113,35 @@ export const auth = betterAuth({
         },
       },
     },
+    session: {
+      create: {
+        // Copre login email di utenti già esistenti, link di verifica e ogni altra sessione
+        before: async (session) => {
+          if (!env.allowlistEnabled) return;
+          const user = await prisma.user.findUnique({ where: { id: session.userId }, select: { email: true } });
+          if (user && !(await isEmailAllowed(user.email))) {
+            throw new APIError("FORBIDDEN", { code: "EMAIL_NOT_ALLOWED", message: texts.errors.EMAIL_NOT_ALLOWED });
+          }
+        },
+      },
+    },
   },
 
   hooks: {
     before: createAuthMiddleware(async (ctx) => {
       const field = PASSWORD_FIELDS[ctx.path];
-      if (!field) return;
-      const value = ctx.body?.[field];
-      const message = typeof value === "string" ? passwordError(value) : null;
-      if (message) throw new APIError("BAD_REQUEST", { message, code: "PASSWORD_POLICY" });
+      if (field) {
+        const value = ctx.body?.[field];
+        const message = typeof value === "string" ? passwordError(value) : null;
+        if (message) throw new APIError("BAD_REQUEST", { message, code: "PASSWORD_POLICY" });
+      }
+      // Registrazione fuori dalla white list: rifiuto esplicito prima di creare l'utente
+      if (ctx.path === "/sign-up/email" && env.allowlistEnabled) {
+        const email = typeof ctx.body?.email === "string" ? ctx.body.email : "";
+        if (!(await isEmailAllowed(email))) {
+          throw new APIError("FORBIDDEN", { code: "EMAIL_NOT_ALLOWED", message: texts.errors.EMAIL_NOT_ALLOWED });
+        }
+      }
     }),
   },
 

@@ -15,6 +15,9 @@ Legenda: **core** = da copiare così com'è · **adatta** = da copiare e persona
 | `lib/auth/roles.ts` | core | `hasRole`, `isPending`, `isAdmin`, `isRole` |
 | `lib/auth/safe-redirect.ts` | core | `safeCallbackUrl`, `loginUrl`, `continueUrl` (anti open redirect) |
 | `lib/auth/password-policy.ts` | core | Schema zod password/email, condiviso client e server |
+| `lib/auth/allowlist-rules.ts` | core | Regole pure della white list (email e domini), testabili senza DB |
+| `lib/auth/allowlist.ts` | core | `isEmailAllowed()`: il controllo sul DB, usato dagli hook in `server.ts` |
+| `app/admin/allowed-emails/*` | adatta | Pagina e server action per gestire la white list (solo demo: adatta al tuo pannello admin) |
 | `lib/auth/errors.ts` | core | Codici di errore Better Auth → messaggi di `texts.ts` |
 | `lib/auth/email/*` | core | `sendAuthEmail`, adapter `console` / `resend` / `sendgrid`, template |
 | `lib/db.ts` | core* | Singleton `PrismaClient` (*salta se il progetto ne ha già uno: aggiorna l'import in `server.ts`) |

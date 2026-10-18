@@ -6,6 +6,7 @@ Template di autenticazione **da copiare** nei nuovi progetti Next.js, basato su 
 - **Google** e un provider **OIDC generico** (IBM w3id, Keycloak, Entra…), attivi solo se configurati
 - Collegamento automatico degli account con la stessa email (solo se l'email locale è verificata)
 - **Ruoli** (NUOVO in attesa di approvazione / USER / ADMIN) letti dal DB a ogni richiesta
+- **White list di email** (opzionale, `AUTH_ALLOWLIST=on`): registrazione e login limitati a email o domini gestiti da `/admin/allowed-emails`
 - Protezione da open redirect, password policy lato server, rate limit su DB, email inviate in background
 - Testi in italiano centralizzati in `lib/auth/texts.ts`
 

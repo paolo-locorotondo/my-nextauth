@@ -23,6 +23,8 @@ const prisma = new PrismaClient();
 const startedAt = new Date();
 const stamp = Date.now();
 const USER = { name: "Smoke Test", email: `smoke-${stamp}@example.com` };
+/** Con la white list accesa lo smoke base registra USER: il suo dominio va ammesso. */
+const USER_DOMAIN = `@example.com`;
 const PASSWORDS = ["Smoke-pass-1", "Smoke-pass-2", "Smoke-pass-3"];
 
 // ── HTTP con cookie jar ────────────────────────────────────────────────
@@ -111,6 +113,12 @@ async function step(name: string, fn: () => Promise<void>) {
 
 async function main() {
   console.log(`Smoke test contro ${BASE}\n`);
+  // No-op se la white list è spenta; con AUTH_ALLOWLIST=on ammette il dominio di test
+  await prisma.allowedEmail.upsert({
+    where: { pattern: USER_DOMAIN },
+    update: {},
+    create: { pattern: USER_DOMAIN, note: "smoke-base" },
+  });
   const anon = new Client();
   const admin = new Client();
   const user = new Client();
@@ -256,7 +264,65 @@ async function main() {
     assert.equal((await user.request("/api/demo/me")).status, 401);
   });
 
+  // White list: gira solo se il server ha AUTH_ALLOWLIST=on (altrimenti gli step si saltano)
+  if (process.env.SMOKE_ALLOWLIST === "on") await allowlistSteps();
+
   console.log(`\n${passed} step OK`);
+}
+
+/**
+ * White list (AUTH_ALLOWLIST=on sul server, SMOKE_ALLOWLIST=on per questo script).
+ * Usa un dominio e un'email di test dedicati, rimossi a fine run.
+ */
+async function allowlistSteps() {
+  const domain = `@smoke-${stamp}.example.com`;
+  const inDomain = `allowed-${stamp}@smoke-${stamp}.example.com`;
+  const outside = `outsider-${stamp}@example.org`;
+  const guest = new Client();
+  const outsiderClient = new Client();
+
+  try {
+    await step("white list: registrazione fuori lista → 403 EMAIL_NOT_ALLOWED", async () => {
+      const res = await outsiderClient.post("/sign-up/email", { name: "Fuori", email: outside, password: PASSWORDS[0] });
+      const json = await body(res);
+      assert.equal(res.status, 403, JSON.stringify(json));
+      assert.equal(json.code, "EMAIL_NOT_ALLOWED");
+      assert.equal(await prisma.user.count({ where: { email: outside } }), 0, "nessun utente creato");
+    });
+
+    await step("white list: aggiunta dominio via DB → registrazione ammessa", async () => {
+      await prisma.allowedEmail.create({ data: { pattern: domain, note: "smoke" } });
+      const res = await guest.post("/sign-up/email", { name: "Dentro", email: inDomain, password: PASSWORDS[0] });
+      assert.equal(res.status, 200, JSON.stringify(await body(res)));
+    });
+
+    await step("white list: login di utente rimosso dalla lista → 403, sessione aperta revocata", async () => {
+      // utente già verificato e con sessione aperta
+      await prisma.user.update({ where: { email: inDomain }, data: { emailVerified: true } });
+      const session = new Client();
+      const login = await session.post("/sign-in/email", { email: inDomain, password: PASSWORDS[0] });
+      assert.equal(login.status, 200, JSON.stringify(await body(login)));
+      assert.equal((await session.request("/api/demo/me")).status, 200);
+
+      // rimozione della voce tramite la stessa logica della server action
+      await prisma.allowedEmail.delete({ where: { pattern: domain } });
+      await prisma.session.deleteMany({ where: { user: { email: inDomain } } });
+
+      const again = await new Client().post("/sign-in/email", { email: inDomain, password: PASSWORDS[0] });
+      const againJson = await body(again);
+      assert.equal(again.status, 403);
+      assert.equal(againJson.code, "EMAIL_NOT_ALLOWED");
+      assert.equal((await session.request("/api/demo/me")).status, 401, "sessione revocata");
+    });
+
+    await step("white list: admin di bootstrap ammesso anche con lista vuota", async () => {
+      const res = await new Client().post("/sign-in/email", ADMIN);
+      assert.equal(res.status, 200, JSON.stringify(await body(res)));
+    });
+  } finally {
+    await prisma.allowedEmail.deleteMany({ where: { pattern: domain } });
+    await prisma.user.deleteMany({ where: { email: { in: [inDomain, outside] } } });
+  }
 }
 
 main()
@@ -266,6 +332,7 @@ main()
   })
   .finally(async () => {
     await prisma.user.deleteMany({ where: { email: USER.email } });
+    await prisma.allowedEmail.deleteMany({ where: { pattern: USER_DOMAIN, note: "smoke-base" } });
     await prisma.verification.deleteMany({ where: { createdAt: { gte: startedAt }, identifier: { contains: USER.email } } });
     await prisma.$disconnect();
   });

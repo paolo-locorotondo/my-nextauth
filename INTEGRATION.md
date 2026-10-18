@@ -19,6 +19,7 @@ Guida per chi copia my-nextauth in un nuovo progetto Next.js 16. Riferimento API
 13. [Opzionale: backend esterno (JWT + JWKS)](#13-opzionale-backend-esterno-jwt--jwks)
 14. [Opzionale: plugin admin di Better Auth](#14-opzionale-plugin-admin-di-better-auth)
 15. [Note di migrazione da next-auth v4](#15-note-di-migrazione-da-next-auth-v4)
+16. [White list di email (AUTH_ALLOWLIST)](#16-white-list-di-email-auth_allowlist)
 
 ---
 
@@ -49,6 +50,7 @@ Tutte sono documentate in [.env.example](.env.example). Le più importanti:
 | `BETTER_AUTH_URL` | sì (prod) | Base per i link email e i redirect OAuth |
 | `TRUSTED_ORIGINS` | no | Altre origini accettate (es. `https://www.dominio.it`, deploy di preview) |
 | `AUTH_ADMIN_EMAILS` | no | Email che diventano ADMIN **alla creazione** dell'utente |
+| `AUTH_ALLOWLIST` | no | `on` limita registrazione e login alla white list di `/admin/allowed-emails` (§16) |
 | `AUTH_RATE_LIMIT` | no | `on` per attivare il rate limit in dev (in prod è sempre attivo) |
 | `AUTH_IP_HEADERS` | no | Header da cui leggere l'IP del client (default `x-forwarded-for`) |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | no | Se vuote, il pulsante Google non compare |
@@ -340,3 +342,41 @@ Il template è pensato per **nuovi progetti**. order-app e reservation-app non v
 - **Sessioni**: i JWT di next-auth non sono riconosciuti, quindi tutti gli utenti dovranno rifare il login. Annuncialo.
 - **Google Cloud**: il redirect URI cambia da `/api/auth/callback/google` di next-auth allo stesso path di Better Auth. Verifica comunque che `BETTER_AUTH_URL` coincida con il vecchio `NEXTAUTH_URL`.
 - **Codice**: `getServerSession` → helper di `lib/auth/helpers.ts`; `useSession` di next-auth → `useSession` di `lib/auth/client.ts`; `signIn("credentials")` → `authClient.signIn.email`.
+
+## 16. White list di email (AUTH_ALLOWLIST)
+
+Limita registrazione e login alle email (o ai domini) inseriti in `/admin/allowed-emails`. È **opt-in**: con `AUTH_ALLOWLIST` vuoto il template si comporta come senza white list.
+
+**Attivazione**
+
+1. Imposta `AUTH_ADMIN_EMAILS` con almeno un admin: è sempre ammesso, anche con la lista vuota.
+2. Applica la migration `allowed_email` (`npx prisma migrate dev`).
+3. Aggiungi in `/admin/allowed-emails` le email e i domini (`@azienda.it`) che devono entrare, **prima** di accendere il flag: chi esiste già e non è in lista verrà rifiutato al prossimo login.
+4. Imposta `AUTH_ALLOWLIST=on` e riavvia.
+
+**Dove viene applicata**
+
+| Flusso | Controllo |
+|---|---|
+| Registrazione email | hook `before` su `/sign-up/email`: 403 `EMAIL_NOT_ALLOWED` |
+| Google / OIDC (primo accesso, collegamento, re-login) | `user.validateUserInfo`: redirect a `/auth/error?error=email_not_allowed` |
+| Login email di utente esistente, link di verifica, qualsiasi sessione | `databaseHooks.session.create.before`: 403 `EMAIL_NOT_ALLOWED` |
+
+**Chi è sempre ammesso**: gli admin in `AUTH_ADMIN_EMAILS` e chiunque abbia ruolo ADMIN nel DB. Così un admin promosso non può essere escluso dalla propria lista.
+
+**Rimozione di una voce**: le sessioni aperte degli utenti che perdono l'accesso vengono revocate subito. Un utente che resta ammesso da un'altra voce (es. la stessa email o il dominio) non viene toccato.
+
+**Cosa non copre**
+
+- Il reset password resta disponibile anche per email fuori lista: la risposta è identica a quella di un account esistente (anti user enumeration), ma l'utente non riuscirà ad accedere.
+- Il messaggio di rifiuto **rivela** se un'email è in lista: è una scelta, perché il messaggio deve essere chiaro. Se serve l'opposto, sostituisci i messaggi in `lib/auth/texts.ts` con un testo generico e accetta che chi è escluso non capisca il motivo.
+- Il controllo vive nel DB, quindi ogni login e registrazione fa una query su `allowed_email` (più una su `user` per gli utenti non ammessi). Le richieste già autenticate non ne fanno.
+
+**Troubleshooting**
+
+| Sintomo | Causa |
+|---|---|
+| Nessuno riesce a entrare dopo aver acceso il flag | Lista vuota e nessun admin in `AUTH_ADMIN_EMAILS`. Imposta l'admin, riavvia, aggiungi le voci. |
+| Un utente verificato viene rifiutato | Non è in lista né ha ruolo ADMIN. Aggiungilo in `/admin/allowed-emails`. |
+| Google rifiuta con `email_not_allowed` | Stessa causa, ma sull'account Google usato. |
+| Dopo la rimozione l'utente è ancora dentro | Revoca su una sessione già scaduta o un'altra voce lo ammette ancora (controlla la lista). |
