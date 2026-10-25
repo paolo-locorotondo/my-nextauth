@@ -90,14 +90,9 @@ export default function LoginForm({ providers, callbackUrl, notice }: Props) {
         </div>
 
         <div>
-          <div className="flex items-center justify-between">
-            <label htmlFor="password" className={labelClass}>
-              {texts.common.password}
-            </label>
-            <Link href={AUTH_ROUTES.forgotPassword} className="text-sm text-blue-600 hover:underline">
-              {texts.login.forgotPassword}
-            </Link>
-          </div>
+          <label htmlFor="password" className={labelClass}>
+            {texts.common.password}
+          </label>
           <PasswordInput
             id="password"
             autoComplete="current-password"
@@ -105,6 +100,11 @@ export default function LoginForm({ providers, callbackUrl, notice }: Props) {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
+          <p className="mt-2 text-right text-sm">
+            <Link href={AUTH_ROUTES.forgotPassword} className="text-blue-600 hover:underline">
+              {texts.login.forgotPassword}
+            </Link>
+          </p>
         </div>
 
         <button type="submit" disabled={pending} className={primaryButtonClass}>

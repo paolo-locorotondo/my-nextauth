@@ -4,7 +4,7 @@ import { texts } from "@/lib/auth/texts";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-6 px-4 py-12">
+    <main className="flex min-h-screen flex-col items-center justify-center gap-6 px-4 py-8 sm:py-12">
       {children}
       <Link href={AUTH_ROUTES.home} className="text-sm text-slate-500 hover:text-slate-700">
         {texts.common.backToHome}

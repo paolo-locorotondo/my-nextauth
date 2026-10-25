@@ -15,6 +15,7 @@ Legenda: **core** = da copiare così com'è · **adatta** = da copiare e persona
 | `lib/auth/roles.ts` | core | `hasRole`, `isPending`, `isAdmin`, `isRole` |
 | `lib/auth/safe-redirect.ts` | core | `safeCallbackUrl`, `loginUrl`, `continueUrl` (anti open redirect) |
 | `lib/auth/password-policy.ts` | core | Schema zod password/email, condiviso client e server |
+| `lib/auth/delete-user.ts` | core | `deleteUserAndData()`: elimina un utente con i token di reset pendenti (la tabella `verification` non ha FK verso `user`) |
 | `lib/auth/allowlist-rules.ts` | core | Regole pure della white list (email e domini), testabili senza DB |
 | `lib/auth/allowlist.ts` | core | `isEmailAllowed()`: il controllo sul DB, usato dagli hook in `server.ts` |
 | `app/admin/allowed-emails/*` | adatta | Pagina e server action per gestire la white list (solo demo: adatta al tuo pannello admin) |
@@ -63,8 +64,16 @@ Legenda: **core** = da copiare così com'è · **adatta** = da copiare e persona
 | `.env.example` | core | Tutte le variabili, commentate |
 | `INTEGRATION.md` | riferimento | Guida di adozione e setup esterni |
 | `docs/AUTHORIZATION_MATRIX.md` | adatta | Template della matrice di autorizzazione |
-| `scripts/unit/*.test.ts` | core | Unit test di redirect, password policy, ruoli |
-| `scripts/smoke.ts` | adatta | Smoke test HTTP end-to-end (usa le rotte demo `/api/demo/*`) |
+| `test/unit/*.test.ts` | core | Unit test di redirect, password policy, ruoli |
+| `test/helpers/http.ts` | core | Client HTTP con cookie jar e lettura email di sviluppo, condivisi da smoke e test HTTP |
+| `test/http/*.test.ts` | core | Test di sicurezza HTTP contro l'app in esecuzione (header, CSRF, ruolo, anti-enumerazione) |
+| `test/db/*.test.ts` | core | Test su DB reale (eliminazione utente) |
+| `test/config/*.test.ts` | core | Test di avvio con env sbagliate e provider email (processo figlio) |
+| `test/e2e/*.spec.ts`, `playwright.config.ts` | core | Test nel browser con Playwright: il test avvia da sé il server di sviluppo (porta 3100) in tre profili di env |
+| `test/tools/run-e2e.mjs` | core | Lancia i profili E2E uno dopo l'altro |
+| `test/coverage-map.md` | adatta | Mappa test manuali ↔ automatici |
+| `test/tools/check-secrets.mjs` | core | Dopo `npm run build`: verifica che il valore dei segreti di `.env` non compaia nei file serviti al browser |
+| `test/smoke/smoke.ts` | adatta | Smoke test HTTP end-to-end (usa le rotte demo `/api/demo/*`) |
 | `test/manual-test-plan.md` | adatta | Piano di test manuale (browser, provider reali, email reali) |
 
 ## Solo demo

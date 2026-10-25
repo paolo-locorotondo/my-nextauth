@@ -13,3 +13,9 @@ next-env.d.ts
 /app/generated/prisma
 # mailbox dell'adapter email "console" (solo dev)
 .dev-mailbox.jsonl
+# cartella temporanea per test e verifiche
+/tmp/*
+
+# Playwright
+/test-results/
+/playwright-report/

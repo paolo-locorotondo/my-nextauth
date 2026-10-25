@@ -4,7 +4,10 @@ import type { SessionUser } from "@/lib/auth/server";
 import { texts } from "@/lib/auth/texts";
 import SignOutButton from "./SignOutButton";
 
-/** Menu utente (server component): link di accesso se anonimo, saluto + azioni se loggato. */
+/**
+ * Menu utente (server component): link di accesso se anonimo, saluto + azioni se loggato.
+ * Su telefono il saluto va su una riga propria e le azioni vanno a capo senza uscire dallo schermo.
+ */
 export default function UserMenu({ user }: { user: SessionUser | null | undefined }) {
   if (!user) {
     return (
@@ -20,15 +23,18 @@ export default function UserMenu({ user }: { user: SessionUser | null | undefine
   }
 
   return (
-    <div className="flex items-center gap-4 text-sm">
-      <span className="text-slate-600">
+    <div className="flex min-w-0 flex-col gap-1 text-sm sm:flex-row sm:items-center sm:gap-x-4">
+      <span className="min-w-0 truncate text-slate-600">
         {texts.userMenu.greeting(user.name || user.email)}{" "}
         <span className="rounded bg-slate-100 px-1.5 py-0.5 text-xs font-medium text-slate-500">{user.role}</span>
       </span>
-      <Link href={AUTH_ROUTES.changePassword} className="font-medium text-slate-600 hover:text-slate-900">
-        {texts.userMenu.changePassword}
-      </Link>
-      <SignOutButton />
+      {/* Le due azioni restano sempre insieme sulla stessa riga */}
+      <span className="flex items-center gap-4">
+        <Link href={AUTH_ROUTES.changePassword} className="font-medium text-slate-600 hover:text-slate-900">
+          {texts.userMenu.changePassword}
+        </Link>
+        <SignOutButton />
+      </span>
     </div>
   );
 }

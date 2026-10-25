@@ -10,13 +10,13 @@ export default async function Home() {
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto max-w-3xl px-4 py-16 text-center">
-        <h1 className="text-4xl font-bold tracking-tight">my-nextauth</h1>
+      <main className="mx-auto max-w-3xl px-4 py-10 text-center sm:py-16">
+        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">my-nextauth</h1>
         <p className="mt-4 text-slate-600">
           Template di autenticazione per Next.js 16 con Better Auth: email e password, verifica email, reset password,
           Google e OIDC, ruoli.
         </p>
-        <div className="mt-8 flex justify-center gap-3">
+        <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
           {session ? (
             <Link
               href={landingForRole(session.user.role)}

@@ -55,4 +55,5 @@ Con `AUTH_ALLOWLIST=on` registrazione e login sono limitati alla white list (ved
 | Action | GUEST | NUOVO | USER | ADMIN |
 |---|---|---|---|---|
 | `setUserRole` (`app/admin/actions.ts`) | AuthError | AuthError | AuthError | ✅ (non sul proprio utente) |
+| `deleteUser` (`app/admin/actions.ts`) | AuthError | AuthError | AuthError | ✅ (non sul proprio utente né sugli admin di `AUTH_ADMIN_EMAILS`) |
 | `addAllowedEmail`, `removeAllowedEmail` (`app/admin/allowed-emails/actions.ts`) | AuthError | AuthError | AuthError | ✅ |

@@ -3,17 +3,19 @@
 import { revalidatePath } from "next/cache";
 import { allowlistPatternSchema, matchesAllowlist } from "@/lib/auth/allowlist-rules";
 import { ADMIN_ROLES } from "@/lib/auth/config";
-import { requireRole } from "@/lib/auth/helpers";
+import { validateAuthFromServerSession } from "@/lib/auth/helpers";
 import { env } from "@/lib/auth/env";
 import { prisma } from "@/lib/db";
 
 export type ActionResult = { ok: true } | { ok: false; error: string };
 
 const PATH = "/admin/allowed-emails";
+const NO_PERMISSION = "Non hai più i permessi per questa operazione: ricarica la pagina.";
 
 /** Aggiunge una voce alla white list (email esatta o @dominio). */
 export async function addAllowedEmail(rawPattern: string, note?: string): Promise<ActionResult> {
-  await requireRole(ADMIN_ROLES);
+  const guard = await validateAuthFromServerSession(ADMIN_ROLES);
+  if (!guard.ok) return { ok: false, error: NO_PERMISSION };
 
   const parsed = allowlistPatternSchema.safeParse(rawPattern);
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Voce non valida" };
@@ -32,7 +34,9 @@ export async function addAllowedEmail(rawPattern: string, note?: string): Promis
  * scadenza. Gli admin di bootstrap e chi esegue l'operazione restano esclusi.
  */
 export async function removeAllowedEmail(id: string): Promise<ActionResult> {
-  const { user: me } = await requireRole(ADMIN_ROLES);
+  const guard = await validateAuthFromServerSession(ADMIN_ROLES);
+  if (!guard.ok) return { ok: false, error: NO_PERMISSION };
+  const me = guard.user;
 
   const entry = await prisma.allowedEmail.findUnique({ where: { id } });
   if (!entry) return { ok: false, error: "Voce non trovata" };

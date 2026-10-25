@@ -66,33 +66,35 @@ export default function AllowedEmailsManager({ entries }: { entries: Entry[] }) 
       {entries.length === 0 ? (
         <p className="text-sm text-slate-500">Nessuna voce: con la white list attiva possono entrare solo gli admin di bootstrap.</p>
       ) : (
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-slate-200 text-slate-500">
-            <tr>
-              <th className="py-2 pr-4 font-medium">Voce</th>
-              <th className="py-2 pr-4 font-medium">Nota</th>
-              <th className="py-2 font-medium" />
-            </tr>
-          </thead>
-          <tbody>
-            {entries.map((e) => (
-              <tr key={e.id} className="border-b border-slate-100 last:border-0">
-                <td className="py-2 pr-4 font-mono">{e.pattern}</td>
-                <td className="py-2 pr-4 text-slate-500">{e.note ?? ""}</td>
-                <td className="py-2 text-right">
-                  <button
-                    type="button"
-                    onClick={() => onRemove(e.id)}
-                    disabled={isPending}
-                    className="text-sm text-red-600 hover:underline disabled:opacity-60"
-                  >
-                    Rimuovi
-                  </button>
-                </td>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="border-b border-slate-200 text-slate-500">
+              <tr>
+                <th className="py-2 pr-4 font-medium">Voce</th>
+                <th className="py-2 pr-4 font-medium">Nota</th>
+                <th className="py-2 font-medium" />
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {entries.map((e) => (
+                <tr key={e.id} className="border-b border-slate-100 last:border-0">
+                  <td className="py-2 pr-4 font-mono break-all">{e.pattern}</td>
+                  <td className="py-2 pr-4 break-words text-slate-500">{e.note ?? ""}</td>
+                  <td className="py-2 text-right">
+                    <button
+                      type="button"
+                      onClick={() => onRemove(e.id)}
+                      disabled={isPending}
+                      className="text-sm text-red-600 hover:underline disabled:opacity-60"
+                    >
+                      Rimuovi
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

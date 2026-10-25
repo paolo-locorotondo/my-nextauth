@@ -12,7 +12,7 @@ export default function ChangePasswordPage() {
   return (
     <>
       <SiteHeader />
-      <main className="flex justify-center px-4 py-12">
+      <main className="flex justify-center px-4 py-8 sm:py-12">
         {/* allowPending: anche un utente in attesa di approvazione può cambiare password */}
         <AuthGate callbackPath={AUTH_ROUTES.changePassword} allowPending>
           {() => <ChangePasswordContent />}

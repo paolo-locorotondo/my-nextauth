@@ -10,7 +10,8 @@ export default async function SiteHeader() {
 
   return (
     <header className="border-b border-slate-200 bg-white">
-      <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
+      {/* Su telefono logo+link e menu utente stanno su due righe; da sm in su su una sola */}
+      <div className="mx-auto flex max-w-5xl flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
         <nav className="flex items-center gap-4 text-sm">
           <Link href="/" className="font-semibold text-slate-900">
             my-nextauth
