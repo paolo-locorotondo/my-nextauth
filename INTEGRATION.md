@@ -494,13 +494,13 @@ Metti `TRUSTED_ORIGINS="http://127.0.0.1:3000"`, riavvia e ripeti: la richiesta 
 
 ## 19. Pulizia dopo l'import: rimuovere la demo
 
-Le parti marcate **demo** in [MANIFEST.md](MANIFEST.md) (`app/page.tsx`, `app/dashboard/`, `app/admin/`, `app/api/demo/`, `components/demo/SiteHeader.tsx`) servono a provare che l'import funziona: **non fanno parte del prodotto**. Smoke test, test HTTP e parte degli E2E usano `/api/demo/me` e `/api/demo/admin` come rotte protette di esempio, perciò si copiano comunque, si usano per la verifica e si tolgono dopo.
+Le parti marcate **demo** in [MANIFEST.md](MANIFEST.md) (`app/page.tsx`, `app/dashboard/`, `app/admin/`, `app/api/demo/`, `components/demo/SiteHeader.tsx`, `components/demo/MenuSezioni.tsx`) servono a provare che l'import funziona: **non fanno parte del prodotto**. Smoke test, test HTTP e parte degli E2E usano `/api/demo/me` e `/api/demo/admin` come rotte protette di esempio, perciò si copiano comunque, si usano per la verifica e si tolgono dopo.
 
 Ordine consigliato:
 
 1. **Verifica con la demo.** Con le rotte demo presenti lancia `npm test`, `npm run typecheck`, `npm run smoke`, `npm run test:http` e `npm run test:e2e`: devono essere verdi prima di toccare qualsiasi cosa.
 2. **Sostituisci le rotte demo con le tue.** Servono due rotte protette reali: una per qualsiasi utente loggato, anche `NUOVO` (`validateAuth(request, undefined, { allowPending: true })`), e una riservata a un ruolo (`validateAuth(request, "ADMIN")`). Anche un semplice `/api/me` e `/api/admin/...` vanno bene.
-3. **Elimina i file demo.** Cancella `app/api/demo/` e `components/demo/`. Se `SiteHeader` ti serve, spostalo prima in `components/` e aggiorna gli import. Sostituisci il contenuto demo di `app/dashboard/` e `app/page.tsx` con le tue pagine.
+3. **Elimina i file demo.** Cancella `app/api/demo/` e `components/demo/`. Se `SiteHeader` ti serve, spostalo prima in `components/` insieme a `MenuSezioni` (che importa) e aggiorna gli import. Sostituisci il contenuto demo di `app/dashboard/` e `app/page.tsx` con le tue pagine.
 4. **Aggiorna `PROTECTED_PREFIXES`** in `lib/auth/config.ts`: togli `/api/demo` e aggiungi i prefissi delle rotte reali.
 5. **Adatta i test** che puntano alle rotte demo: `test/smoke/smoke.ts`, `test/http/sessions.test.ts`, `test/e2e/a-access.spec.ts` (A.4), `test/e2e/i-roles.spec.ts` e il piano manuale. Basta cambiare i path con quelli reali, il comportamento atteso resta lo stesso (401, 403, 200 senza cache stale).
 6. **Aggiorna `docs/AUTHORIZATION_MATRIX.md`** (righe `/api/demo/*`) e rilancia tutta la suite: deve restare verde.

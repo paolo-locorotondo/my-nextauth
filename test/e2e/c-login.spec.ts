@@ -1,7 +1,7 @@
 /** Sezione C del piano manuale: login con email e password. */
 import { expect, test } from "@playwright/test";
 import { texts } from "../../lib/auth/texts";
-import { ADMIN, formError, login } from "./helpers";
+import { ADMIN, apriMenuUtente, formError, login } from "./helpers";
 
 test("C.1 login ADMIN → atterraggio su /admin", async ({ page }) => {
   await login(page, ADMIN.email, ADMIN.password);
@@ -10,6 +10,7 @@ test("C.1 login ADMIN → atterraggio su /admin", async ({ page }) => {
 
 test("C.2 logout, poi login da /dashboard → torna su /dashboard", async ({ page }) => {
   await login(page, ADMIN.email, ADMIN.password);
+  await apriMenuUtente(page);
   await page.getByRole("button", { name: texts.userMenu.signOut }).click();
   await expect(page.getByRole("banner").getByRole("link", { name: texts.userMenu.signIn })).toBeVisible();
   await page.goto("/dashboard");

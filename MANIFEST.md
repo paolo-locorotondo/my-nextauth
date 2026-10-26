@@ -46,7 +46,8 @@ Legenda: **core** = da copiare così com'è · **adatta** = da copiare e persona
 | `AuthGate.tsx` | core | Server component: protegge una pagina (redirect / pending / denied) |
 | `PasswordInput.tsx` | core | Input con mostra/nascondi |
 | `ProviderButtons.tsx` | core | Pulsanti Google / OIDC (solo i provider configurati) |
-| `UserMenu.tsx`, `SignOutButton.tsx` | core | Menu utente e logout |
+| `UserMenu.tsx`, `SignOutButton.tsx` | core | Menu utente a tendina (client component) e logout |
+| `../demo/MenuSezioni.tsx` | demo | Hamburger (telefono) e voci in linea con sottovoci (desktop) usati da `components/demo/SiteHeader.tsx` |
 | `PendingApproval.tsx`, `AccessDenied.tsx` | adatta | Messaggi per ruoli pending / non autorizzati |
 | `ui.tsx` | adatta | Classi Tailwind e `AuthCard` / `FormMessage` (sostituiscile con il design system del progetto) |
 
@@ -78,7 +79,7 @@ Legenda: **core** = da copiare così com'è · **adatta** = da copiare e persona
 
 ## Solo demo
 
-`app/page.tsx`, `app/dashboard/`, `app/admin/`, `app/api/demo/`, `components/demo/SiteHeader.tsx`, `docker-compose.yml`.
+`app/page.tsx`, `app/dashboard/`, `app/admin/`, `app/api/demo/`, `components/demo/SiteHeader.tsx`, `components/demo/MenuSezioni.tsx`, `docker-compose.yml`.
 
 ## Dipendenze
 

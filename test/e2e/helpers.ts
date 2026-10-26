@@ -15,3 +15,10 @@ export async function login(page: Page, email: string, password: string, from = 
 
 /** Messaggio di errore del form (FormMessage), escluso il "route announcer" di Next che ha anch'esso role=alert. */
 export const formError = (page: Page) => page.locator('[role="alert"]:not(#__next-route-announcer__)');
+
+/** Apre la tendina del menu utente (l'unico pulsante con aria-haspopup="menu" nell'header); "Esci" e "Cambia password" stanno lì dentro. */
+export async function apriMenuUtente(page: Page) {
+  const pulsante = page.getByRole("banner").locator('button[aria-haspopup="menu"]');
+  await pulsante.click();
+  await expect(pulsante).toHaveAttribute("aria-expanded", "true");
+}

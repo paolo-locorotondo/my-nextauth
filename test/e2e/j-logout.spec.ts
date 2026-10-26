@@ -2,7 +2,7 @@
 import { expect, test } from "@playwright/test";
 import { texts } from "../../lib/auth/texts";
 import { deleteUsers } from "./db";
-import { login } from "./helpers";
+import { apriMenuUtente, login } from "./helpers";
 import { createUser, PASSWORD } from "./users";
 
 const stamp = Date.now();
@@ -22,6 +22,7 @@ test.afterAll(() => {
 
 test("J.1 Esci: anonimo in home, dashboard richiede di nuovo il login", async ({ page }) => {
   await login(page, EMAIL, PASSWORD, "/dashboard");
+  await apriMenuUtente(page);
   await page.getByRole("button", { name: texts.userMenu.signOut, exact: true }).click();
   await expect(page.getByRole("banner").getByRole("link", { name: texts.userMenu.signIn, exact: true })).toBeVisible();
   await page.goto("/dashboard");
@@ -30,6 +31,7 @@ test("J.1 Esci: anonimo in home, dashboard richiede di nuovo il login", async ({
 
 test("J.2 dopo il logout il tasto indietro non mostra la dashboard", async ({ page }) => {
   await login(page, EMAIL, PASSWORD, "/dashboard");
+  await apriMenuUtente(page);
   await page.getByRole("button", { name: texts.userMenu.signOut, exact: true }).click();
   await expect(page.getByRole("banner").getByRole("link", { name: texts.userMenu.signIn, exact: true })).toBeVisible();
   await page.goBack().catch(() => undefined);
