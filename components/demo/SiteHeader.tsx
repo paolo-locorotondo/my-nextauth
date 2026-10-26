@@ -33,7 +33,8 @@ export default async function SiteHeader() {
           {voci.length > 0 && <MenuSezioni voci={voci} />}
           <Link href="/" className="flex shrink-0 items-center gap-2 font-semibold text-slate-900">
             <span aria-hidden className="inline-block h-5 w-5 rounded-sm bg-blue-600" />
-            my-nextauth
+            {/* Su telefono resta solo il logo: il nome si accavallerebbe al menu utente */}
+            <span className="sr-only sm:not-sr-only">my-nextauth</span>
           </Link>
           <NavDesktop voci={voci} />
         </div>
