@@ -49,7 +49,7 @@ Legenda: **core** = da copiare così com'è · **adatta** = da copiare e persona
 | `UserMenu.tsx`, `SignOutButton.tsx` | core | Menu utente a tendina (client component) e logout |
 | `../demo/MenuSezioni.tsx` | demo | Hamburger (telefono) e voci in linea con sottovoci (desktop) usati da `components/demo/SiteHeader.tsx` |
 | `PendingApproval.tsx`, `AccessDenied.tsx` | adatta | Messaggi per ruoli pending / non autorizzati |
-| `ui.tsx` | adatta | Classi Tailwind e `AuthCard` / `FormMessage` (sostituiscile con il design system del progetto) |
+| `ui.tsx` | adatta | Classi Tailwind, `AuthCard` / `FormMessage` e gli elementi condivisi `DeleteButton`, `selectClass`, `selectTabellaClass` (sostituiscili con il design system del progetto). Resta nel core: serve anche dopo la rimozione della demo |
 
 ## Database
 
@@ -62,6 +62,7 @@ Legenda: **core** = da copiare così com'è · **adatta** = da copiare e persona
 
 | File | Tipo | Ruolo |
 |---|---|---|
+| `app/globals.css` | adatta | Due regole da copiare nel CSS globale del progetto: cursore a mano sui pulsanti (`@layer base`) e `.select-custom` (freccia dei select, usata da `selectClass` / `selectTabellaClass`) |
 | `.env.example` | core | Tutte le variabili, commentate |
 | `INTEGRATION.md` | riferimento | Guida di adozione e setup esterni |
 | `docs/AUTHORIZATION_MATRIX.md` | adatta | Template della matrice di autorizzazione |

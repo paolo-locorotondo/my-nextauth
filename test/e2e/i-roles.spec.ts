@@ -80,7 +80,7 @@ test("I.7 eliminazione: annulla non cambia nulla, conferma rimuove utente e dati
 
   await login(page, ADMIN.email, ADMIN.password, "/admin");
   page.once("dialog", (d) => d.dismiss());
-  await row(page, victim).getByRole("button", { name: "Elimina", exact: true }).click();
+  await row(page, victim).getByRole("button", { name: /^Elimina/ }).click();
   await expect(row(page, victim)).toHaveCount(1);
   expect(countUsers(victim)).toBe(1);
 
@@ -89,7 +89,7 @@ test("I.7 eliminazione: annulla non cambia nulla, conferma rimuove utente e dati
     expect(d.message()).toContain("non è reversibile");
     d.accept();
   });
-  await row(page, victim).getByRole("button", { name: "Elimina", exact: true }).click();
+  await row(page, victim).getByRole("button", { name: /^Elimina/ }).click();
   await expect(row(page, victim)).toHaveCount(0);
   expect(countUsers(victim)).toBe(0);
 

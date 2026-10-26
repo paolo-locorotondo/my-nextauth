@@ -119,7 +119,7 @@ test("O.8 O.9 O.10 rimozione di un dominio: revoca sessioni, voce singola e ADMI
   await login(page, ADMIN.email, ADMIN.password, "/admin/allowed-emails");
   await Promise.all([
     page.waitForResponse((r) => r.request().method() === "POST" && r.url().includes("/admin/allowed-emails")),
-    entryRow(page, DOMAIN2).getByRole("button", { name: "Rimuovi" }).click(),
+    entryRow(page, DOMAIN2).getByRole("button", { name: /^Rimuovi/ }).click(),
   ]);
   await expect(entryRow(page, DOMAIN2)).toHaveCount(0);
 
