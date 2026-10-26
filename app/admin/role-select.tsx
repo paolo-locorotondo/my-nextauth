@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { selectTabellaClass } from "@/components/auth/ui";
 import { setUserRole } from "./actions";
 
 export default function RoleSelect({ userId, role, roles }: { userId: string; role: string; roles: readonly string[] }) {
@@ -19,7 +20,8 @@ export default function RoleSelect({ userId, role, roles }: { userId: string; ro
             setError(r.ok ? null : r.error);
           });
         }}
-        className="rounded-md border border-slate-300 bg-white px-2 py-1 text-sm"
+        aria-label="Ruolo"
+        className={selectTabellaClass}
       >
         {roles.map((r) => (
           <option key={r} value={r}>

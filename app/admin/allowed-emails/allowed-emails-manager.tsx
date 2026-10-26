@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { DeleteButton } from "@/components/auth/ui";
 import { addAllowedEmail, removeAllowedEmail } from "./actions";
 
 type Entry = { id: string; pattern: string; note: string | null };
@@ -81,14 +82,9 @@ export default function AllowedEmailsManager({ entries }: { entries: Entry[] }) 
                   <td className="py-2 pr-4 font-mono break-all">{e.pattern}</td>
                   <td className="py-2 pr-4 break-words text-slate-500">{e.note ?? ""}</td>
                   <td className="py-2 text-right">
-                    <button
-                      type="button"
-                      onClick={() => onRemove(e.id)}
-                      disabled={isPending}
-                      className="text-sm text-red-600 hover:underline disabled:opacity-60"
-                    >
+                    <DeleteButton onClick={() => onRemove(e.id)} disabled={isPending} label={`Rimuovi ${e.pattern}`} compact>
                       Rimuovi
-                    </button>
+                    </DeleteButton>
                   </td>
                 </tr>
               ))}

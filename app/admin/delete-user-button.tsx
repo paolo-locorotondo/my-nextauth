@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { DeleteButton } from "@/components/auth/ui";
 import { deleteUser } from "./actions";
 
 export default function DeleteUserButton({ userId, email }: { userId: string; email: string }) {
@@ -20,14 +21,9 @@ export default function DeleteUserButton({ userId, email }: { userId: string; em
 
   return (
     <div className="flex items-center gap-2">
-      <button
-        type="button"
-        onClick={onClick}
-        disabled={isPending}
-        className="rounded-md border border-red-200 px-2.5 py-1 text-sm font-medium text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
-      >
+      <DeleteButton onClick={onClick} disabled={isPending} label={`Elimina ${email}`} compact>
         {isPending ? "Elimino…" : "Elimina"}
-      </button>
+      </DeleteButton>
       {error && (
         <span role="alert" className="text-xs text-red-600">
           {error}
