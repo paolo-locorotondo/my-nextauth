@@ -93,7 +93,7 @@ DELETE FROM verification WHERE "expiresAt" < now();
 
 Altre due cose da sapere:
 
-- `verification` **non ha chiavi esterne** verso `user`: cancellando un utente i suoi token di reset pendenti non cadono da soli. Il pulsante "Elimina" di `/admin` li toglie (`lib/auth/delete-user.ts`); se cancelli un utente a mano da Adminer, pulisci anche `DELETE FROM verification WHERE value = '<id utente>'`.
+- `verification` **non ha chiavi esterne** verso `user`: cancellando un utente i suoi token di reset pendenti non cadono da soli. Il pulsante "Elimina" di `/admin/users` li toglie (`lib/auth/delete-user.ts`); se cancelli un utente a mano da Adminer, pulisci anche `DELETE FROM verification WHERE value = '<id utente>'`.
 - `session` e `account` invece hanno `ON DELETE CASCADE`: spariscono con l'utente.
 
 ## Ripulire il database per ripetere i test
@@ -106,7 +106,7 @@ Tre livelli, dal meno al più invasivo. Tutti i comandi sono per **PowerShell**,
 docker exec auth-postgres psql -U auth -d my_nextauth -c "DELETE FROM \"user\" WHERE email <> 'admin@example.com';"
 ```
 
-`session` e `account` spariscono a cascata. Se usi una email diversa per l'admin, cambiala nel comando. In alternativa usa il pulsante **Elimina** di `/admin`, che toglie anche i token di reset pendenti.
+`session` e `account` spariscono a cascata. Se usi una email diversa per l'admin, cambiala nel comando. In alternativa usa il pulsante **Elimina** di `/admin/users`, che toglie anche i token di reset pendenti.
 
 **2. Svuotare anche i contatori e i token (consigliato tra due giri di test)**
 
@@ -173,7 +173,7 @@ Verifica, tra le altre cose: home pubblica, redirect al login con `callbackUrl`,
 | `/` | pubblica |
 | `/auth/*` | login, registrazione, password dimenticata, reset, verifica email, errori |
 | `/dashboard` | utenti approvati (NUOVO vede "in attesa di approvazione") |
-| `/admin` | ADMIN: elenco utenti e cambio ruolo |
+| `/admin/users` | ADMIN: elenco utenti e cambio ruolo (`/admin` rimanda qui) |
 | `/user/change-password` | qualsiasi utente loggato |
 | `/api/demo/me`, `/api/demo/admin` | esempi di route handler protetti |
 

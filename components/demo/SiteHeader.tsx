@@ -17,7 +17,7 @@ export default async function SiteHeader() {
             href: "/admin",
             label: "Admin",
             figli: [
-              { href: "/admin", label: "Utenti" },
+              { href: "/admin/users", label: "Utenti" },
               { href: "/admin/allowed-emails", label: "Email ammesse" },
             ],
           },

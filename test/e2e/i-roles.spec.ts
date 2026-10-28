@@ -12,7 +12,7 @@ const row = (page: import("@playwright/test").Page, email: string) => page.locat
 /** Cambia il ruolo dalla UI e attende la fine della server action (POST a /admin). */
 async function setRole(page: import("@playwright/test").Page, select: import("@playwright/test").Locator, role: string) {
   await Promise.all([
-    page.waitForResponse((r) => r.request().method() === "POST" && new URL(r.url()).pathname === "/admin"),
+    page.waitForResponse((r) => r.request().method() === "POST" && new URL(r.url()).pathname === "/admin/users"),
     select.selectOption(role),
   ]);
 }
@@ -49,7 +49,7 @@ test("I.2 e I.3 cambio ruolo dalla UI: USER poi ADMIN, accesso aggiornato al rel
 
   await setRole(page, select, "ADMIN");
   await userPage.reload();
-  await expect(userPage.getByRole("link", { name: "Admin", exact: true })).toBeVisible();
+  await expect(userPage.getByRole("button", { name: "Admin", exact: true })).toBeVisible();
   await expect(userPage.getByRole("heading", { name: "Utenti" })).toBeVisible();
   await setRole(page, select, "USER");
   await userPage.reload();

@@ -35,7 +35,7 @@ test("isPending e isAdmin", () => {
 });
 
 test("landingForRole", () => {
-  assert.equal(landingForRole("ADMIN"), "/admin");
+  assert.equal(landingForRole("ADMIN"), "/admin/users");
   assert.equal(landingForRole("USER"), "/dashboard");
   assert.equal(landingForRole("NUOVO"), "/dashboard");
   assert.equal(landingForRole(undefined), "/dashboard");

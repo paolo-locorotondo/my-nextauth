@@ -1,0 +1,62 @@
+### POST cambio password per testare il test manuale H.1
+POST http://localhost:3000/api/auth/change-password HTTP/1.1
+content-type: application/json
+
+{
+    "currentPassword":"Admin123!",
+    "newPassword":"Prova123!",
+    "revokeOtherSessions":true
+}
+
+### POST di registra utente per testare il test manuale I.6 Il ruolo non si può forzare in registrazione:
+POST http://localhost:3000/api/auth/sign-up/email HTTP/1.1
+content-type: application/json
+
+{
+    "email": "prova-rest-cLient@gmail.com",
+    "name": "Rest Client",
+    "password": "Prova123!",
+    "role": "ADMIN"
+}
+
+### POST di registra utente per testare il test manuale K.4 CSRF: una `POST /api/auth/sign-in/email` con header `Origin: https://evil.com` viene rifiutata (403)
+POST http://localhost:3000/api/auth/sign-up/email HTTP/1.1
+content-type: application/json
+Origin: https://evil.com
+
+{
+    "email": "prova-rest-cLient@gmail.com",
+    "name": "Rest Client",
+    "password": "Prova123!",
+    "role": "ADMIN"
+}
+
+### per testare il test manuale K.5 Server action protetta: da un utente USER, provare a chiamare `setUserRole` (es. replicando dal Network tab la richiesta fatta da un ADMIN) fallisce e il ruolo non cambia.
+# @no-redirect
+POST http://localhost:3000/admin HTTP/1.1
+Accept: text/x-component
+Accept-Language: it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7
+Cache-Control: no-cache
+Connection: keep-alive
+Content-Type: text/plain;charset=UTF-8
+Origin: http://localhost:3000
+Pragma: no-cache
+Referer: http://localhost:3000/admin
+Sec-Fetch-Dest: empty
+Sec-Fetch-Mode: cors
+Sec-Fetch-Site: same-origin
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36
+next-action: 6091e928f5d47f45c8dafec079cdbb26a01cc19484
+next-router-state-tree: %5B%22%22%2C%7B%22children%22%3A%5B%22admin%22%2C%7B%22children%22%3A%5B%22__PAGE__%22%2C%7B%7D%2Cnull%2Cnull%2C0%5D%7D%2Cnull%2Cnull%2C0%5D%7D%2Cnull%2Cnull%2C16%5D
+sec-ch-ua: "Google Chrome";v="155", "Chromium";v="155", "Not(A:Brand";v="24"
+sec-ch-ua-mobile: ?0
+sec-ch-ua-platform: "Windows"
+x-nextjs-html-request-id: 6OuMrk5NvM8bJtZitx6hd
+x-nextjs-request-id: 2e46ff86
+Cookie: adminer_permanent=; adminer_key=4b0fcbaeca95c6db1e0679c6e07448aa; adminer_version=6.1.2; adminer_sid=g057v1ao1r9osc6db735pgfbd3;
+
+["163h7QHvBTBrnE7VAUVIilaMqFyKQfEO","ADMIN"]
+
+###
+# Cookie: better-auth.session_token=kY4kJ8Ui3sAhCatqPN1Se1c9Qh3jlM8f.8JpmYLGwtCUJAeV%2BXSJLN3hfE2TdRiFpPvFcjwh%2BofM%3D; adminer_permanent=; adminer_key=4b0fcbaeca95c6db1e0679c6e07448aa; adminer_version=6.1.2; adminer_sid=g057v1ao1r9osc6db735pgfbd3;
+# Cookie: better-auth.session_token=nfwO5TBt30CQEtjuUqVnOvWqN426WreP.xJPedWp8gJqgk8DNJpp54IfhW%2BpXXGEqt6EQZx%2BMQLk%3D; adminer_permanent=; adminer_key=4b0fcbaeca95c6db1e0679c6e07448aa; adminer_version=6.1.2; adminer_sid=g057v1ao1r9osc6db735pgfbd3;

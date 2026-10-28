@@ -36,7 +36,7 @@ export const AUTH_ROUTES = {
 export function landingForRole(role: string | null | undefined): string {
   switch (role) {
     case "ADMIN":
-      return "/admin";
+      return "/admin/users";
     default:
       return "/dashboard";
   }

@@ -24,7 +24,7 @@ export async function setUserRole(userId: string, role: string): Promise<ActionR
 
   await prisma.user.update({ where: { id: userId }, data: { role } });
   // La sessione è letta dal DB a ogni richiesta: il nuovo ruolo vale subito
-  revalidatePath("/admin");
+  revalidatePath("/admin/users");
   return { ok: true };
 }
 
@@ -47,6 +47,6 @@ export async function deleteUser(userId: string): Promise<ActionResult> {
   }
 
   await deleteUserAndData(prisma, userId);
-  revalidatePath("/admin");
+  revalidatePath("/admin/users");
   return { ok: true };
 }

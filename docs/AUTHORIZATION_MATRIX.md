@@ -35,9 +35,9 @@ Ruoli (in `ROLES` di `lib/auth/config.ts`):
 | `/` | ✅ | ✅ | ✅ | ✅ |
 | `/auth/login`, `/auth/register` | ✅ | ↪ continue | ↪ continue | ↪ continue |
 | `/auth/forgot-password`, `/auth/reset-password`, `/auth/verify-email`, `/auth/error` | ✅ | ✅ | ✅ | ✅ |
-| `/auth/continue` | ↪ login | → `/dashboard` | → `/dashboard` | → `/admin` |
+| `/auth/continue` | ↪ login | → `/dashboard` | → `/dashboard` | → `/admin/users` |
 | `/dashboard` | ↪ | ⏳ | ✅ | ✅ |
-| `/admin` | ↪ | ⏳ | ❌ | ✅ |
+| `/admin` (redirect a `/admin/users`), `/admin/users`, `/admin/allowed-emails` | ↪ | ⏳ | ❌ | ✅ |
 | `/user/change-password` | ↪ | ✅ (cred) / link "imposta password" (solo OAuth) | idem | idem |
 
 ## API
@@ -54,6 +54,6 @@ Con `AUTH_ALLOWLIST=on` registrazione e login sono limitati alla white list (ved
 
 | Action | GUEST | NUOVO | USER | ADMIN |
 |---|---|---|---|---|
-| `setUserRole` (`app/admin/actions.ts`) | AuthError | AuthError | AuthError | ✅ (non sul proprio utente) |
-| `deleteUser` (`app/admin/actions.ts`) | AuthError | AuthError | AuthError | ✅ (non sul proprio utente né sugli admin di `AUTH_ADMIN_EMAILS`) |
+| `setUserRole` (`app/admin/users/actions.ts`) | AuthError | AuthError | AuthError | ✅ (non sul proprio utente) |
+| `deleteUser` (`app/admin/users/actions.ts`) | AuthError | AuthError | AuthError | ✅ (non sul proprio utente né sugli admin di `AUTH_ADMIN_EMAILS`) |
 | `addAllowedEmail`, `removeAllowedEmail` (`app/admin/allowed-emails/actions.ts`) | AuthError | AuthError | AuthError | ✅ |

@@ -18,6 +18,8 @@ Legenda: **core** = da copiare così com'è · **adatta** = da copiare e persona
 | `lib/auth/delete-user.ts` | core | `deleteUserAndData()`: elimina un utente con i token di reset pendenti (la tabella `verification` non ha FK verso `user`) |
 | `lib/auth/allowlist-rules.ts` | core | Regole pure della white list (email e domini), testabili senza DB |
 | `lib/auth/allowlist.ts` | core | `isEmailAllowed()`: il controllo sul DB, usato dagli hook in `server.ts` |
+| `docs/SITEMAP.md` | adatta | Albero delle pagine con i ruoli; si aggiorna a ogni nuova pagina, insieme ad AUTHORIZATION_MATRIX |
+| `app/admin/users/*`, `app/admin/page.tsx` | adatta | Elenco utenti, cambio ruolo, eliminazione (`/admin/users`); `/admin` fa solo redirect (solo demo: adatta al tuo pannello admin) |
 | `app/admin/allowed-emails/*` | adatta | Pagina e server action per gestire la white list (solo demo: adatta al tuo pannello admin) |
 | `lib/auth/errors.ts` | core | Codici di errore Better Auth → messaggi di `texts.ts` |
 | `lib/auth/email/*` | core | `sendAuthEmail`, adapter `console` / `resend` / `sendgrid`, template |

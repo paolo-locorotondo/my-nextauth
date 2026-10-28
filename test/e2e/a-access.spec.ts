@@ -40,9 +40,9 @@ test("A.5 /auth/error mostra il messaggio italiano e Riprova porta al login", as
 
 test("A.6 da loggato /auth/login e /auth/register rimandano alla pagina di atterraggio", async ({ page }) => {
   await login(page, ADMIN.email, ADMIN.password);
-  await expect(page).toHaveURL(/\/admin$/);
+  await expect(page).toHaveURL(/\/admin\/users$/);
   for (const path of ["/auth/login", "/auth/register"]) {
     await page.goto(path);
-    await expect(page).toHaveURL(/\/admin$/);
+    await expect(page).toHaveURL(/\/admin\/users$/);
   }
 });

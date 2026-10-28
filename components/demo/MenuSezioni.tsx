@@ -32,7 +32,7 @@ function useChiusura(aperto: boolean, chiudi: () => void, contenitore: React.Ref
   }, [aperto, chiudi, contenitore]);
 }
 
-/** Voci in linea per desktop (da `md`). Un gruppo ha il link della sezione e una tendina con le sottovoci. */
+/** Voci in linea per desktop (da `md`). Un gruppo non è una pagina: il clic sull'etichetta apre la tendina con le sottovoci. */
 export function NavDesktop({ voci }: { voci: Voce[] }) {
   const pathname = usePathname();
   return (
@@ -71,21 +71,14 @@ function GruppoDesktop({ voce, pathname }: { voce: Voce; pathname: string }) {
 
   return (
     <div ref={contenitore} className="relative flex items-center">
-      <Link
-        href={voce.href}
-        aria-current={pathname === voce.href ? "page" : undefined}
-        className={`rounded-l px-2 py-1.5 text-slate-600 hover:bg-slate-100 hover:text-slate-900 aria-[current=page]:font-semibold aria-[current=page]:text-blue-600 ${attiva(pathname, voce) ? "font-semibold text-blue-600" : ""} ${focusRing}`}
-      >
-        {voce.label}
-      </Link>
       <button
         type="button"
         aria-expanded={aperto}
         aria-controls={idMenu}
         onClick={() => setAperto((v) => !v)}
-        className={`rounded-r px-1 py-1.5 text-slate-600 hover:bg-slate-100 hover:text-slate-900 ${focusRing}`}
+        className={`flex items-center gap-1 rounded px-2 py-1.5 text-slate-600 hover:bg-slate-100 hover:text-slate-900 ${attiva(pathname, voce) ? "font-semibold text-blue-600" : ""} ${focusRing}`}
       >
-        <span className="sr-only">{`Sottovoci di ${voce.label}`}</span>
+        {voce.label}
         <svg aria-hidden viewBox="0 0 20 20" className={`h-4 w-4 transition-transform ${aperto ? "rotate-180" : ""}`}>
           <path d="M5 7l5 5 5-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
@@ -164,25 +157,24 @@ export default function MenuSezioni({ voci }: { voci: Voce[] }) {
               const idGruppo = `${idMenu}-${v.href.replace(/\W/g, "")}`;
               return (
                 <li key={v.href}>
-                  <div className="flex items-center">
+                  {figli.length > 0 ? (
+                    <button
+                      type="button"
+                      aria-expanded={aperta}
+                      aria-controls={idGruppo}
+                      onClick={() => alterna(v.href)}
+                      className={`${voceClass} w-full justify-between text-left ${attiva(pathname, v) ? "font-semibold text-blue-600" : ""}`}
+                    >
+                      {v.label}
+                      <svg aria-hidden viewBox="0 0 20 20" className={`h-5 w-5 text-slate-600 transition-transform ${aperta ? "rotate-180" : ""}`}>
+                        <path d="M5 7l5 5 5-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </button>
+                  ) : (
                     <Link href={v.href} aria-current={pathname === v.href ? "page" : undefined} className={voceClass}>
                       {v.label}
                     </Link>
-                    {figli.length > 0 && (
-                      <button
-                        type="button"
-                        aria-expanded={aperta}
-                        aria-controls={idGruppo}
-                        onClick={() => alterna(v.href)}
-                        className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded hover:bg-slate-100 ${focusRing}`}
-                      >
-                        <span className="sr-only">{`Sottovoci di ${v.label}`}</span>
-                        <svg aria-hidden viewBox="0 0 20 20" className={`h-5 w-5 text-slate-600 transition-transform ${aperta ? "rotate-180" : ""}`}>
-                          <path d="M5 7l5 5 5-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      </button>
-                    )}
-                  </div>
+                  )}
                   {figli.length > 0 && aperta && (
                     <ul id={idGruppo} className="mb-1 ml-5 border-l border-slate-200 pl-2">
                       {figli.map((f) => (

@@ -61,12 +61,12 @@ test("O.1 email fuori lista: messaggio nel form, nessun utente creato", async ({
 test("O.2 admin di bootstrap (AUTH_ADMIN_EMAILS) entra con la lista vuota", async ({ page, request, baseURL }) => {
   await createUser(request, baseURL!, E2E_BOOTSTRAP_ADMIN, "ADMIN", "Bootstrap");
   await login(page, E2E_BOOTSTRAP_ADMIN, PASSWORD);
-  await expect(page).toHaveURL(/\/admin$/);
+  await expect(page).toHaveURL(/\/admin\/users$/);
 });
 
 test("O.3 admin di seed (ADMIN nel DB) entra", async ({ page }) => {
   await login(page, ADMIN.email, ADMIN.password);
-  await expect(page).toHaveURL(/\/admin$/);
+  await expect(page).toHaveURL(/\/admin\/users$/);
 });
 
 test("O.4 e O.5 gestione voci: aggiunta, voci malformate e duplicato", async ({ page }) => {
@@ -137,7 +137,7 @@ test("O.8 O.9 O.10 rimozione di un dominio: revoca sessioni, voce singola e ADMI
 
   // O.10: ADMIN → sessione intatta
   await sAdmin.page.goto("/admin");
-  await expect(sAdmin.page).toHaveURL(/\/admin$/);
+  await expect(sAdmin.page).toHaveURL(/\/admin\/users$/);
 
   await Promise.all([sPlain.context.close(), sSingle.context.close(), sAdmin.context.close()]);
 });

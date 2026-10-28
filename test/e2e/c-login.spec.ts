@@ -5,7 +5,7 @@ import { ADMIN, apriMenuUtente, formError, login } from "./helpers";
 
 test("C.1 login ADMIN → atterraggio su /admin", async ({ page }) => {
   await login(page, ADMIN.email, ADMIN.password);
-  await expect(page).toHaveURL(/\/admin$/);
+  await expect(page).toHaveURL(/\/admin\/users$/);
 });
 
 test("C.2 logout, poi login da /dashboard → torna su /dashboard", async ({ page }) => {
@@ -44,6 +44,6 @@ test("C.4 il pulsante occhio mostra e nasconde la password", async ({ page }) =>
 
 test("C.5 callbackUrl esterno ignorato: atterra sulla pagina di ruolo", async ({ page }) => {
   await login(page, ADMIN.email, ADMIN.password, "/auth/login?callbackUrl=https://evil.com");
-  await expect(page).toHaveURL(/\/admin$/);
+  await expect(page).toHaveURL(/\/admin\/users$/);
   expect(new URL(page.url()).hostname).toBe("localhost");
 });

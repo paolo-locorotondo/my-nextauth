@@ -236,7 +236,7 @@ export async function GET(request: Request) {
 - Ogni nuovo utente (email, Google, OIDC) riceve `DEFAULT_ROLE`, oppure `ADMIN` se la sua email è in `AUTH_ADMIN_EMAILS` (hook `databaseHooks.user.create.before`). La lista vale **solo alla creazione**: aggiungere un'email in seguito non promuove un utente già esistente.
 - Il ruolo è `input: false`: non si può impostare dalla registrazione.
 - La sessione viene letta dal DB a ogni richiesta (il `cookieCache` di Better Auth è disattivato), quindi un cambio di ruolo vale **subito**. Se attivi `session.cookieCache` per ridurre le query, accetti che un ruolo revocato resti valido fino alla scadenza della cache.
-- Per cambiare ruolo: server action con `requireRole("ADMIN")` + `prisma.user.update` (vedi `app/admin/actions.ts`).
+- Per cambiare ruolo: server action con `requireRole("ADMIN")` + `prisma.user.update` (vedi `app/admin/users/actions.ts`).
 
 ## 10. Flusso di login e redirect
 
@@ -244,7 +244,7 @@ export async function GET(request: Request) {
 pagina protetta ──(proxy, no cookie)──▶ /auth/login?callbackUrl=/pagina
 login email / Google / OIDC / link di verifica ──▶ /auth/continue?callbackUrl=/pagina
 /auth/continue: callbackUrl valido? ──sì──▶ /pagina
-                                     └─no──▶ landingForRole(ruolo)   (ADMIN → /admin, altri → /dashboard)
+                                     └─no──▶ landingForRole(ruolo)   (ADMIN → /admin/users, altri → /dashboard)
 ```
 
 - Tutti i flussi passano `callbackURL = continueUrl(callbackUrl)` a Better Auth. Passalo anche nelle chiamate API custom a `/sign-in/email`: il link di verifica reinviato al login di un utente non verificato (`sendOnSignIn`) usa quel valore (default `/`).
@@ -506,4 +506,4 @@ Ordine consigliato:
 5. **Adatta i test** che puntano alle rotte demo: `test/smoke/smoke.ts`, `test/http/sessions.test.ts`, `test/e2e/a-access.spec.ts` (A.4), `test/e2e/i-roles.spec.ts` e il piano manuale. Basta cambiare i path con quelli reali, il comportamento atteso resta lo stesso (401, 403, 200 senza cache stale).
 6. **Aggiorna `docs/AUTHORIZATION_MATRIX.md`** (righe `/api/demo/*`) e rilancia tutta la suite: deve restare verde.
 
-> `app/admin/` (cambio ruolo, eliminazione utenti, white list) è marcata demo ma di solito serve davvero: tienila, adattando il layout al tuo design. Togli però i riferimenti "Demo" rimasti: i commenti JSDoc in `app/admin/actions.ts`, `app/admin/page.tsx` e `app/admin/allowed-emails/page.tsx` (es. `/** Demo: elenco utenti… */`) e il titolo "Pagine (demo)" in `docs/AUTHORIZATION_MATRIX.md`. Per trovarli: `grep -rni demo app lib components test docs`.
+> `app/admin/` (cambio ruolo, eliminazione utenti, white list) è marcata demo ma di solito serve davvero: tienila, adattando il layout al tuo design. Togli però i riferimenti "Demo" rimasti: i commenti JSDoc in `app/admin/users/actions.ts`, `app/admin/users/page.tsx` e `app/admin/allowed-emails/page.tsx` (es. `/** Demo: elenco utenti… */`) e il titolo "Pagine (demo)" in `docs/AUTHORIZATION_MATRIX.md`. Per trovarli: `grep -rni demo app lib components test docs`.

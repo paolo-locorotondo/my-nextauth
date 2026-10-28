@@ -49,7 +49,7 @@ test("K.5 server action di cambio ruolo rigiocata da un utente senza permessi: n
   await login(page, ADMIN.email, ADMIN.password, "/admin");
   const row = page.locator("tr", { hasText: VICTIM });
   const [captured] = await Promise.all([
-    page.waitForRequest((r) => r.method() === "POST" && new URL(r.url()).pathname === "/admin"),
+    page.waitForRequest((r) => r.method() === "POST" && new URL(r.url()).pathname === "/admin/users"),
     row.locator("select").selectOption("USER"),
   ]);
   await expect.poll(() => getRole(VICTIM)).toBe("USER");
@@ -62,7 +62,7 @@ test("K.5 server action di cambio ruolo rigiocata da un utente senza permessi: n
   for (const k of ["cookie", "host", "content-length", "origin", "referer"]) delete headers[k];
   const body = (captured.postData() ?? "").replace('"USER"', '"ADMIN"');
   expect(body).toContain("ADMIN");
-  const replay = await ctx.request.post("/admin", { headers: { ...headers, Origin: baseURL! }, data: body });
+  const replay = await ctx.request.post("/admin/users", { headers: { ...headers, Origin: baseURL! }, data: body });
   expect(replay.status()).toBeLessThan(500);
 
   expect(getRole(VICTIM)).toBe("USER");

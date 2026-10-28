@@ -65,18 +65,18 @@ async function main() {
     assert.equal((await anon.request("/api/demo/me")).status, 401);
   });
 
-  await step("login ADMIN senza callbackUrl → landingForRole (/admin)", async () => {
+  await step("login ADMIN senza callbackUrl → landingForRole (/admin/users)", async () => {
     const res = await admin.post("/sign-in/email", ADMIN);
     assert.equal(res.status, 200, JSON.stringify(await body(res)));
     const cont = await admin.request("/auth/continue");
     assert.equal(cont.status, 307);
-    assert.equal(location(cont), "/admin");
+    assert.equal(location(cont), "/admin/users");
   });
 
   await step("/auth/continue: callbackUrl valido rispettato, esterno ignorato", async () => {
     assert.equal(location(await admin.request("/auth/continue?callbackUrl=%2Fdashboard%3Fx%3D1")), "/dashboard?x=1");
-    assert.equal(location(await admin.request("/auth/continue?callbackUrl=https%3A%2F%2Fevil.com")), "/admin");
-    assert.equal(location(await admin.request("/auth/continue?callbackUrl=%2F%2Fevil.com")), "/admin");
+    assert.equal(location(await admin.request("/auth/continue?callbackUrl=https%3A%2F%2Fevil.com")), "/admin/users");
+    assert.equal(location(await admin.request("/auth/continue?callbackUrl=%2F%2Fevil.com")), "/admin/users");
   });
 
   await step("callbackURL esterno rifiutato da Better Auth (sign-in e reset)", async () => {
