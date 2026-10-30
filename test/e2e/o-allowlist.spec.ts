@@ -3,7 +3,7 @@ import { expect, test, type Browser, type Page } from "@playwright/test";
 import { texts } from "../../lib/auth/texts";
 import { E2E_BOOTSTRAP_ADMIN, E2E_NOTE } from "./constants";
 import { addAllowed, countUsers, deleteAllowedByNote, deleteUsers } from "./db";
-import { ADMIN, formError, login } from "./helpers";
+import { ADMIN, deleteFromMenu, formError, login, menuItem } from "./helpers";
 import { createUser, PASSWORD } from "./users";
 
 const stamp = Date.now();
@@ -13,9 +13,9 @@ const inDomain = (tag: string, d = DOMAIN) => `${tag}-${stamp}${d}`;
 const created: string[] = [E2E_BOOTSTRAP_ADMIN];
 
 const PATTERN_PLACEHOLDER = "mario@x.it oppure @azienda.it";
-/** Riga della tabella la cui cella "Voce" è esattamente il pattern. */
+/** Riga della tabella il cui menu sul nome è quello del pattern (nome accessibile "Azioni per {pattern}"). */
 const entryRow = (page: Page, pattern: string) =>
-  page.getByRole("row").filter({ has: page.getByRole("cell", { name: pattern, exact: true }) });
+  page.getByRole("row").filter({ has: page.getByRole("button", { name: `Azioni per ${pattern}`, exact: true }) });
 
 async function register(page: Page, email: string) {
   await page.goto("/auth/register");
@@ -27,6 +27,8 @@ async function register(page: Page, email: string) {
 }
 
 async function addEntry(page: Page, pattern: string, note = "") {
+  // La notifica dell'esito precedente sta in alto a destra e può coprire il pulsante: la si chiude.
+  await page.getByRole("button", { name: "Chiudi la notifica" }).click({ timeout: 500 }).catch(() => {});
   await page.getByPlaceholder(PATTERN_PLACEHOLDER).fill(pattern);
   await page.getByPlaceholder("Nota (facoltativa)").fill(note);
   await Promise.all([
@@ -119,7 +121,7 @@ test("O.8 O.9 O.10 rimozione di un dominio: revoca sessioni, voce singola e ADMI
   await login(page, ADMIN.email, ADMIN.password, "/admin/allowed-emails");
   await Promise.all([
     page.waitForResponse((r) => r.request().method() === "POST" && r.url().includes("/admin/allowed-emails")),
-    entryRow(page, DOMAIN2).getByRole("button", { name: /^Rimuovi/ }).click(),
+    deleteFromMenu(entryRow(page, DOMAIN2), DOMAIN2),
   ]);
   await expect(entryRow(page, DOMAIN2)).toHaveCount(0);
 
@@ -140,4 +142,30 @@ test("O.8 O.9 O.10 rimozione di un dominio: revoca sessioni, voce singola e ADMI
   await expect(sAdmin.page).toHaveURL(/\/admin\/users$/);
 
   await Promise.all([sPlain.context.close(), sSingle.context.close(), sAdmin.context.close()]);
+});
+
+test("O.11 modifica di una voce: la nota si aggiorna; cambiando il dominio perde la sessione chi non è più ammesso", async ({ page, browser, request, baseURL }) => {
+  const dom = `@wl3-${stamp}.example.com`;
+  const dom2 = `@wl4-${stamp}.example.com`;
+  addAllowed(dom, E2E_NOTE);
+  const user = inDomain("o11", dom);
+  created.push(user);
+  await createUser(request, baseURL!, user, "USER", "O11");
+  const s = await sessionFor(browser, baseURL!, user);
+
+  await login(page, ADMIN.email, ADMIN.password, "/admin/allowed-emails");
+  await menuItem(entryRow(page, dom), dom, "Modifica");
+  await page.getByLabel("Nota").last().fill(`${E2E_NOTE} bis`);
+  await page.getByRole("button", { name: "Salva modifiche" }).click();
+  await expect(entryRow(page, dom)).toContainText(`${E2E_NOTE} bis`);
+  await s.page.goto("/dashboard");
+  await expect(s.page).not.toHaveURL(/\/auth\/login/);
+
+  await menuItem(entryRow(page, dom), dom, "Modifica");
+  await page.getByLabel("Email o dominio").last().fill(dom2);
+  await page.getByRole("button", { name: "Salva modifiche" }).click();
+  await expect(entryRow(page, dom2)).toBeVisible();
+  await s.page.goto("/dashboard");
+  await expect(s.page).toHaveURL(/\/auth\/login/);
+  await s.context.close();
 });

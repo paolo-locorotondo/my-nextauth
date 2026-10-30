@@ -3,15 +3,16 @@ import AuthGate from "@/components/auth/AuthGate";
 import SiteHeader from "@/components/demo/SiteHeader";
 import { ADMIN_ROLES, ROLES } from "@/lib/auth/config";
 import { prisma } from "@/lib/db";
-import DeleteUserButton from "./delete-user-button";
 import RoleSelect from "./role-select";
+import UserNameMenu from "./user-name-menu";
+import DeleteUserButton from "./delete-user-button";
 
 /** Demo: elenco utenti, cambio ruolo ed eliminazione (solo ADMIN). */
 export default function AdminPage() {
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto max-w-5xl px-4 py-6 sm:py-10">
+      <main className="mx-auto max-w-7xl px-4 py-6 sm:py-10">
         <AuthGate callbackPath="/admin/users" roles={ADMIN_ROLES}>
           {(me) => <UsersTable meId={me.id} />}
         </AuthGate>
@@ -59,18 +60,24 @@ async function UsersTable({ meId }: { meId: string }) {
               <th className="py-2 pr-4 font-medium">Verificata</th>
               <th className="py-2 pr-4 font-medium">Accesso</th>
               <th className="py-2 pr-4 font-medium">Ruolo</th>
-              <th className="py-2 font-medium" />
             </tr>
           </thead>
           <tbody>
             {users.map((u) => (
               <tr key={u.id} className="border-b border-slate-100 last:border-0">
-                <td className="py-2 pr-4">{u.name}</td>
+                <td className="py-2 pr-4">
+                  {u.id === meId ? (
+                    <>
+                      {u.name} <span className="text-slate-400">(tu)</span>
+                    </>
+                  ) : (
+                    <UserNameMenu userId={u.id} name={u.name} email={u.email} />
+                  )}
+                </td>
                 <td className="py-2 pr-4 break-all">{u.email}</td>
                 <td className="py-2 pr-4">{u.emailVerified ? "sì" : "no"}</td>
                 <td className="py-2 pr-4 text-slate-500">{u.accounts.map((a) => a.providerId).join(", ")}</td>
                 <td className="py-2 pr-4">{role(u)}</td>
-                <td className="py-2 text-right">{actions(u)}</td>
               </tr>
             ))}
           </tbody>

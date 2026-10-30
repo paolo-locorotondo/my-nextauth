@@ -1,4 +1,5 @@
 import { Children } from "react";
+import { DismissibleAlert } from "./DismissibleAlert";
 
 /** Classi e piccoli componenti condivisi dalle pagine di autenticazione. */
 
@@ -46,6 +47,50 @@ export function DeleteButton({
   );
 }
 
+/** Pulsante di azione di riga o scheda (esegue qualcosa): stesso aspetto del DeleteButton, senza il rosso. */
+export function ActionButton({
+  onClick,
+  disabled,
+  children,
+  label,
+  compact = false,
+}: {
+  onClick: () => void;
+  disabled?: boolean;
+  children: React.ReactNode;
+  label?: string;
+  compact?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={label}
+      className={`inline-flex items-center justify-center rounded border border-slate-300 bg-white px-3 font-sans text-sm font-medium text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/40 disabled:cursor-not-allowed disabled:opacity-60 ${compact ? "min-h-8" : "min-h-11"}`}
+    >
+      {children}
+    </button>
+  );
+}
+
+/**
+ * Contenitore delle azioni di una riga o scheda: i tasti in fila e, SOTTO i tasti, l'errore dell'azione.
+ * L'errore di una riga non va mai in un altro blocco della pagina.
+ */
+export function RowActions({ error, align = "start", children }: { error?: string | null; align?: "start" | "end"; children: React.ReactNode }) {
+  return (
+    <div className={`flex flex-col gap-1 ${align === "end" ? "items-end" : "items-start"}`}>
+      <div className={`flex flex-wrap items-center gap-2 ${align === "end" ? "justify-end" : ""}`}>{children}</div>
+      {error && (
+        <div className="max-w-xs text-left">
+          <FormMessage kind="error">{error}</FormMessage>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function FormMessage({ kind, children }: { kind: "error" | "success" | "info"; children: React.ReactNode }) {
   // Children.toArray scarta null/false/undefined: `{error}{unverified && ...}` è un array
   // di due elementi vuoti, quindi `!children` da solo non basta e comparirebbe un riquadro vuoto.
@@ -55,8 +100,10 @@ export function FormMessage({ kind, children }: { kind: "error" | "success" | "i
     success: "border-green-200 bg-green-50 text-green-700",
     info: "border-blue-200 bg-blue-50 text-blue-700",
   }[kind];
+  // Gli errori si chiudono con la X; `key` riparte da zero quando cambia il testo
+  if (kind === "error") return <DismissibleAlert key={typeof children === "string" ? children : undefined}>{children}</DismissibleAlert>;
   return (
-    <div role={kind === "error" ? "alert" : "status"} className={`rounded-lg border px-3 py-2 text-sm ${styles}`}>
+    <div role="status" className={`rounded-lg border px-3 py-2 text-sm ${styles}`}>
       {children}
     </div>
   );

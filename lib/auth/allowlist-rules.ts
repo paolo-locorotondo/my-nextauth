@@ -21,9 +21,13 @@ export function matchesAllowlist(email: string, patterns: readonly string[]): bo
   return patterns.some((p) => p === e || (domain !== null && p === domain));
 }
 
+/** Lunghezze massime della white list: 254 è il tetto di un indirizzo email (RFC 5321). */
+export const ALLOWLIST_LIMITS = { pattern: 254, note: 200 } as const;
+
 /** Voce valida: email esatta oppure "@dominio.tld". Salvata in minuscolo. */
 export const allowlistPatternSchema = z
   .string()
+  .max(ALLOWLIST_LIMITS.pattern, `Massimo ${ALLOWLIST_LIMITS.pattern} caratteri`)
   .transform(normalizeEmail)
   .refine(
     (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) || /^@[^\s@]+\.[^\s@]+$/.test(v),

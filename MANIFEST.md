@@ -19,8 +19,8 @@ Legenda: **core** = da copiare così com'è · **adatta** = da copiare e persona
 | `lib/auth/allowlist-rules.ts` | core | Regole pure della white list (email e domini), testabili senza DB |
 | `lib/auth/allowlist.ts` | core | `isEmailAllowed()`: il controllo sul DB, usato dagli hook in `server.ts` |
 | `docs/SITEMAP.md` | adatta | Albero delle pagine con i ruoli; si aggiorna a ogni nuova pagina, insieme ad AUTHORIZATION_MATRIX |
-| `app/admin/users/*`, `app/admin/page.tsx` | adatta | Elenco utenti, cambio ruolo, eliminazione (`/admin/users`); `/admin` fa solo redirect (solo demo: adatta al tuo pannello admin) |
-| `app/admin/allowed-emails/*` | adatta | Pagina e server action per gestire la white list (solo demo: adatta al tuo pannello admin) |
+| `app/admin/users/*`, `app/admin/page.tsx` | adatta | Elenco utenti, cambio ruolo, eliminazione dal menu sul nome (`/admin/users`); `/admin` fa solo redirect (solo demo: adatta al tuo pannello admin) |
+| `app/admin/allowed-emails/*` | adatta | Pagina e server action per gestire la white list: aggiunta, modifica, rimozione con revoca mirata delle sessioni (solo demo: adatta al tuo pannello admin) |
 | `lib/auth/errors.ts` | core | Codici di errore Better Auth → messaggi di `texts.ts` |
 | `lib/auth/email/*` | core | `sendAuthEmail`, adapter `console` / `resend` / `sendgrid`, template |
 | `lib/db.ts` | core* | Singleton `PrismaClient` (*salta se il progetto ne ha già uno: aggiorna l'import in `server.ts`) |
@@ -51,7 +51,10 @@ Legenda: **core** = da copiare così com'è · **adatta** = da copiare e persona
 | `UserMenu.tsx`, `SignOutButton.tsx` | core | Menu utente a tendina (client component) e logout |
 | `../demo/MenuSezioni.tsx` | demo | Hamburger (telefono) e voci in linea con sottovoci (desktop) usati da `components/demo/SiteHeader.tsx` |
 | `PendingApproval.tsx`, `AccessDenied.tsx` | adatta | Messaggi per ruoli pending / non autorizzati |
-| `ui.tsx` | adatta | Classi Tailwind, `AuthCard` / `FormMessage` e gli elementi condivisi `DeleteButton`, `selectClass`, `selectTabellaClass` (sostituiscili con il design system del progetto). Resta nel core: serve anche dopo la rimozione della demo |
+| `ui.tsx` | adatta | Classi Tailwind, `AuthCard` / `FormMessage` (gli errori si chiudono con la X) e gli elementi condivisi `DeleteButton`, `ActionButton`, `RowActions`, `selectClass`, `selectTabellaClass` (sostituiscili con il design system del progetto). Resta nel core: serve anche dopo la rimozione della demo |
+| `DismissibleAlert.tsx` | adatta | Riquadro rosso di un errore con la X in alto a destra, usato da `FormMessage` |
+| `Toast.tsx` | adatta | `ToastProvider` (nel root layout) e `useToast()`: notifica di esito positivo in sovraimpressione, 8 s, chiudibile |
+| `NameMenu.tsx` | adatta | Menu contestuale sul nome di una riga (link, azione, elimina con conferma); usato da `/admin/users` e `/admin/allowed-emails` |
 
 ## Database
 

@@ -2,7 +2,7 @@
 import { expect, test } from "@playwright/test";
 import { texts } from "../../lib/auth/texts";
 import { countUsers, deleteUsers, prepareUser } from "./db";
-import { ADMIN, login } from "./helpers";
+import { ADMIN, deleteFromMenu, login, menuItem } from "./helpers";
 import { createUser, PASSWORD } from "./users";
 
 const stamp = Date.now();
@@ -79,17 +79,15 @@ test("I.7 eliminazione: annulla non cambia nulla, conferma rimuove utente e dati
   await login(otherPage, victim, PASSWORD);
 
   await login(page, ADMIN.email, ADMIN.password, "/admin");
-  page.once("dialog", (d) => d.dismiss());
-  await row(page, victim).getByRole("button", { name: /^Elimina/ }).click();
+  // "Annulla" nel menu: l'utente resta
+  await deleteFromMenu(row(page, victim), victim, false);
   await expect(row(page, victim)).toHaveCount(1);
   expect(countUsers(victim)).toBe(1);
 
-  page.once("dialog", (d) => {
-    expect(d.message()).toContain(victim);
-    expect(d.message()).toContain("non è reversibile");
-    d.accept();
-  });
-  await row(page, victim).getByRole("button", { name: /^Elimina/ }).click();
+  // La conferma sta dentro il menu e dice che non si può annullare
+  await menuItem(row(page, victim), victim, "Elimina");
+  await expect(page.getByRole("menu")).toContainText("Non si può annullare");
+  await page.getByRole("menu").getByRole("button", { name: `Sì, elimina ${victim}` }).click();
   await expect(row(page, victim)).toHaveCount(0);
   expect(countUsers(victim)).toBe(0);
 
@@ -100,7 +98,8 @@ test("I.7 eliminazione: annulla non cambia nulla, conferma rimuove utente e dati
 
 test("I.8 (parziale) nessun pulsante elimina sulla propria riga", async ({ page }) => {
   await login(page, ADMIN.email, ADMIN.password, "/admin");
-  await expect(row(page, ADMIN.email).getByRole("button", { name: "Elimina" })).toHaveCount(0);
+  await expect(row(page, ADMIN.email).getByRole("button", { name: /^Azioni per/ })).toHaveCount(0);
+  await expect(row(page, ADMIN.email).first()).toContainText("(tu)");
   // Il seed admin è in AUTH_ADMIN_EMAILS: rimosso solo se la variabile lo include
   const seedRow = row(page, ADMIN.email).first();
   await expect(seedRow).toBeVisible();

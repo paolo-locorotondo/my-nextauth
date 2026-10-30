@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { allowlistPatternSchema, matchesAllowlist } from "../../lib/auth/allowlist-rules";
+import { ALLOWLIST_LIMITS, allowlistPatternSchema, matchesAllowlist } from "../../lib/auth/allowlist-rules";
 
 test("email esatta, case-insensitive", () => {
   assert.ok(matchesAllowlist("Mario@X.it", ["mario@x.it"]));
@@ -24,4 +24,11 @@ test("schema voci: normalizza e rifiuta le voci malformate", () => {
   for (const bad of ["foo", "@", "a@b@c", "@dominio", "mario@", "", "con spazio@x.it"]) {
     assert.ok(!allowlistPatternSchema.safeParse(bad).success, `doveva rifiutare: ${JSON.stringify(bad)}`);
   }
+});
+
+test("una voce più lunga del limite è rifiutata", () => {
+  const long = `${"a".repeat(ALLOWLIST_LIMITS.pattern)}@x.it`;
+  const r = allowlistPatternSchema.safeParse(long);
+  assert.ok(!r.success);
+  assert.equal(r.error.issues[0]?.message, `Massimo ${ALLOWLIST_LIMITS.pattern} caratteri`);
 });

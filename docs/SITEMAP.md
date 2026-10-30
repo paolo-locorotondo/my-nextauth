@@ -9,8 +9,8 @@ Un utente NUOVO vede sempre l'attesa di approvazione.
 ├── auth/…                      login, registrazione, recupero password, verifica email
 ├── dashboard                   tutti gli utenti approvati
 ├── admin                       ADMIN    solo redirect a users; nel menu è un gruppo che apre la tendina
-│   ├── users                   ADMIN    utenti, ruoli, eliminazione
-│   └── allowed-emails          ADMIN    white list delle email
+│   ├── users                   ADMIN    utenti, ruoli, eliminazione dal menu sul nome
+│   └── allowed-emails          ADMIN    white list delle email (aggiungi, modifica, rimuovi)
 └── user/change-password        tutti gli autenticati
 ```
 

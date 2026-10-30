@@ -27,7 +27,7 @@ export default async function SiteHeader() {
 
   return (
     <header className="relative border-b border-slate-200 bg-white">
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-2">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2">
         <div className="flex min-w-0 items-center gap-3 sm:gap-6">
           {/* Su telefono l'hamburger sta prima del marchio; il pannello si ancora all'header */}
           {voci.length > 0 && <MenuSezioni voci={voci} />}

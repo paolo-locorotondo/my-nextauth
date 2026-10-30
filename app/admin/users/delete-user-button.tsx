@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { DeleteButton } from "@/components/auth/ui";
+import { DeleteButton, RowActions } from "@/components/auth/ui";
 import { deleteUser } from "./actions";
 
 export default function DeleteUserButton({ userId, email }: { userId: string; email: string }) {
@@ -20,15 +20,10 @@ export default function DeleteUserButton({ userId, email }: { userId: string; em
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <RowActions error={error}>
       <DeleteButton onClick={onClick} disabled={isPending} label={`Elimina ${email}`} compact>
         {isPending ? "Elimino…" : "Elimina"}
       </DeleteButton>
-      {error && (
-        <span role="alert" className="text-xs text-red-600">
-          {error}
-        </span>
-      )}
-    </div>
+    </RowActions>
   );
 }
