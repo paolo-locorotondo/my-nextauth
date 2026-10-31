@@ -52,6 +52,8 @@ Legenda: **core** = da copiare così com'è · **adatta** = da copiare e persona
 | `../demo/MenuSezioni.tsx` | demo | Hamburger (telefono) e voci in linea con sottovoci (desktop) usati da `components/demo/SiteHeader.tsx` |
 | `PendingApproval.tsx`, `AccessDenied.tsx` | adatta | Messaggi per ruoli pending / non autorizzati |
 | `ui.tsx` | adatta | Classi Tailwind, `AuthCard` / `FormMessage` (gli errori si chiudono con la X) e gli elementi condivisi `DeleteButton`, `ActionButton`, `RowActions`, `selectClass`, `selectTabellaClass` (sostituiscili con il design system del progetto). Resta nel core: serve anche dopo la rimozione della demo |
+| `Field.tsx` | adatta | `Field` (etichetta, errore sotto il campo, contatore), `CharCounter`, `fieldProps`, `focusFirstError`: standard dei form, gli errori di un campo stanno sotto il campo con `aria-invalid` e focus sul primo errato; il riquadro con la X è solo per errori non legati a un campo |
+| `DeleteConfirm.tsx` | adatta | Elimina in due passi inline, anche su telefono: "Sì, elimina" / "Annulla" (mai `window.confirm`); `notice` dice cosa si perde |
 | `DismissibleAlert.tsx` | adatta | Riquadro rosso di un errore con la X in alto a destra, usato da `FormMessage` |
 | `Toast.tsx` | adatta | `ToastProvider` (nel root layout) e `useToast()`: notifica di esito positivo in sovraimpressione, 8 s, chiudibile |
 | `NameMenu.tsx` | adatta | Menu contestuale sul nome di una riga (link, azione, elimina con conferma); usato da `/admin/users` e `/admin/allowed-emails` |

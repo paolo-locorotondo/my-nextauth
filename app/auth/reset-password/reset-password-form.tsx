@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import PasswordInput from "@/components/auth/PasswordInput";
-import { AuthCard, FormMessage, labelClass, linkClass, primaryButtonClass } from "@/components/auth/ui";
+import Field, { fieldProps, focusFirstError } from "@/components/auth/Field";
+import { AuthCard, FormMessage, linkClass, primaryButtonClass } from "@/components/auth/ui";
 import { authClient } from "@/lib/auth/client";
 import { AUTH_ROUTES } from "@/lib/auth/config";
 import { clientErrorMessage } from "@/lib/auth/errors";
@@ -18,16 +19,22 @@ export default function ResetPasswordForm({ token }: { token: string }) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [invalidToken, setInvalidToken] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const clear = (k: string) => setFieldErrors((f) => (f[k] ? { ...f, [k]: "" } : f));
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const invalid = passwordError(password) ?? (password !== confirm ? texts.register.passwordMismatch : null);
-    if (invalid) {
-      setError(invalid);
+    const invalid: Record<string, string> = {};
+    const pwd = passwordError(password);
+    if (pwd) invalid.password = pwd;
+    else if (password !== confirm) invalid.confirm = texts.register.passwordMismatch;
+    setFieldErrors(invalid);
+    setError(null);
+    if (Object.keys(invalid).length > 0) {
+      focusFirstError(["password", "confirm"], invalid);
       return;
     }
     setPending(true);
-    setError(null);
 
     // Revoca anche le sessioni esistenti (revokeSessionsOnPasswordReset in server.ts)
     const { error } = await authClient.resetPassword({ newPassword: password, token });
@@ -54,18 +61,30 @@ export default function ResetPasswordForm({ token }: { token: string }) {
             </>
           )}
         </FormMessage>
-        <div>
-          <label htmlFor="password" className={labelClass}>
-            {texts.resetPassword.newPassword}
-          </label>
-          <PasswordInput id="password" autoComplete="new-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
-        </div>
-        <div>
-          <label htmlFor="confirm" className={labelClass}>
-            {texts.register.confirmPassword}
-          </label>
-          <PasswordInput id="confirm" autoComplete="new-password" required value={confirm} onChange={(e) => setConfirm(e.target.value)} />
-        </div>
+        <Field id="password" label={texts.resetPassword.newPassword} error={fieldErrors.password}>
+          <PasswordInput
+            {...fieldProps("password", fieldErrors.password)}
+            autoComplete="new-password"
+            required
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              clear("password");
+            }}
+          />
+        </Field>
+        <Field id="confirm" label={texts.register.confirmPassword} error={fieldErrors.confirm}>
+          <PasswordInput
+            {...fieldProps("confirm", fieldErrors.confirm)}
+            autoComplete="new-password"
+            required
+            value={confirm}
+            onChange={(e) => {
+              setConfirm(e.target.value);
+              clear("confirm");
+            }}
+          />
+        </Field>
         <button type="submit" disabled={pending} className={primaryButtonClass}>
           {pending ? texts.common.loading : texts.resetPassword.submit}
         </button>

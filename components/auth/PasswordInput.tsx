@@ -12,12 +12,12 @@ interface Props extends Omit<InputHTMLAttributes<HTMLInputElement>, "type"> {
 const VARIANT_CLASSES: Record<Variant, { input: string; toggle: string }> = {
   dark: {
     input:
-      "w-full rounded-lg border border-slate-600 bg-slate-800 px-4 py-2 pr-10 text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20",
+      "w-full rounded-lg border border-slate-600 bg-slate-800 px-4 py-2 pr-10 text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 aria-[invalid=true]:border-red-500",
     toggle: "text-slate-400 hover:text-slate-200",
   },
   light: {
     input:
-      "mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 pr-10 text-base text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20",
+      "mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 pr-10 text-base text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 aria-[invalid=true]:border-red-500",
     toggle: "text-slate-500 hover:text-slate-700",
   },
 };

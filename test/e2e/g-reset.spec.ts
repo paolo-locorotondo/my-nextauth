@@ -2,7 +2,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { texts } from "../../lib/auth/texts";
 import { deleteUsers, verifyUser } from "./db";
-import { formError, login } from "./helpers";
+import { fieldError, formError, login } from "./helpers";
 import { now, waitForLink } from "./mail";
 
 const stamp = Date.now();
@@ -59,7 +59,7 @@ test("G.3 password debole rifiutata, valida → login con avviso", async ({ page
   await requestReset(page, EMAIL);
   await page.goto(await waitForLink(EMAIL, texts.email.reset.subject, at));
   await setNewPassword(page, "debole");
-  await expect(formError(page)).toBeVisible();
+  await expect(fieldError(page, "password")).toBeVisible();
   await setNewPassword(page, NEW);
   await expect(page).toHaveURL(/\/auth\/login\?notice=password-updated/);
   await expect(page.getByText(texts.login.passwordUpdated)).toBeVisible();

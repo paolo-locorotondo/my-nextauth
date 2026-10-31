@@ -2,7 +2,7 @@
 import { expect, test } from "@playwright/test";
 import { texts } from "../../lib/auth/texts";
 import { deleteUsers, verifyUser } from "./db";
-import { formError, login } from "./helpers";
+import { fieldError, formError, login } from "./helpers";
 
 const stamp = Date.now();
 const EMAIL = `h-${stamp}@example.com`;
@@ -45,9 +45,9 @@ test("H.1 password attuale sbagliata: errore nel form", async ({ page }) => {
 test("H.2 nuova password uguale alla vecchia o non confermata: rifiutata", async ({ page }) => {
   await login(page, EMAIL, OLD);
   await changePassword(page, OLD, OLD);
-  await expect(formError(page)).toHaveText(texts.changePassword.samePassword);
+  await expect(fieldError(page, "password")).toHaveText(texts.changePassword.samePassword);
   await changePassword(page, OLD, NEW, "Diversa-pass-9");
-  await expect(formError(page)).toHaveText(texts.register.passwordMismatch);
+  await expect(fieldError(page, "confirm")).toHaveText(texts.register.passwordMismatch);
 });
 
 test("H.3 cambio corretto: messaggio di successo, la nuova password funziona", async ({ page, browser, baseURL }) => {

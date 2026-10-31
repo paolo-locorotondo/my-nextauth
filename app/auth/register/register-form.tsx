@@ -5,9 +5,10 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import PasswordInput from "@/components/auth/PasswordInput";
 import ProviderButtons, { type ProviderButtonsProps } from "@/components/auth/ProviderButtons";
-import { AuthCard, FormMessage, inputClass, labelClass, linkClass, primaryButtonClass } from "@/components/auth/ui";
+import Field, { fieldProps, focusFirstError } from "@/components/auth/Field";
+import { AuthCard, FormMessage, inputClass, linkClass, primaryButtonClass } from "@/components/auth/ui";
 import { authClient } from "@/lib/auth/client";
-import { AUTH_ROUTES } from "@/lib/auth/config";
+import { AUTH_ROUTES, FIELD_LIMITS } from "@/lib/auth/config";
 import { clientErrorMessage } from "@/lib/auth/errors";
 import { emailSchema, passwordError } from "@/lib/auth/password-policy";
 import { continueUrl } from "@/lib/auth/safe-redirect";
@@ -22,24 +23,29 @@ export default function RegisterForm({ providers, callbackUrl }: ProviderButtons
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  function validate(): string | null {
-    if (!name.trim()) return texts.validation.name;
-    if (!emailSchema.safeParse(email).success) return texts.validation.email;
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const clear = (k: string) => setFieldErrors((f) => (f[k] ? { ...f, [k]: "" } : f));
+
+  function validate(): Record<string, string> {
+    const f: Record<string, string> = {};
+    if (!name.trim()) f.name = texts.validation.name;
+    if (!emailSchema.safeParse(email).success) f.email = texts.validation.email;
     const pwd = passwordError(password);
-    if (pwd) return pwd;
-    if (password !== confirm) return texts.register.passwordMismatch;
-    return null;
+    if (pwd) f.password = pwd;
+    if (!pwd && password !== confirm) f.confirm = texts.register.passwordMismatch;
+    return f;
   }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     const invalid = validate();
-    if (invalid) {
-      setError(invalid);
+    setFieldErrors(invalid);
+    setError(null);
+    if (Object.keys(invalid).length > 0) {
+      focusFirstError(["name", "email", "password", "confirm"], invalid);
       return;
     }
     setPending(true);
-    setError(null);
 
     const { error } = await authClient.signUp.email({
       name: name.trim(),
@@ -66,41 +72,62 @@ export default function RegisterForm({ providers, callbackUrl }: ProviderButtons
       <form onSubmit={onSubmit} className="space-y-4" noValidate>
         <FormMessage kind="error">{error}</FormMessage>
 
-        <div>
-          <label htmlFor="name" className={labelClass}>
-            {texts.common.name}
-          </label>
-          <input id="name" autoComplete="name" required value={name} onChange={(e) => setName(e.target.value)} className={inputClass} />
-        </div>
-
-        <div>
-          <label htmlFor="email" className={labelClass}>
-            {texts.common.email}
-          </label>
+        <Field id="name" label={texts.common.name} error={fieldErrors.name} max={FIELD_LIMITS.name} value={name}>
           <input
-            id="email"
+            {...fieldProps("name", fieldErrors.name)}
+            autoComplete="name"
+            required
+            maxLength={FIELD_LIMITS.name}
+            value={name}
+            onChange={(e) => {
+              setName(e.target.value);
+              clear("name");
+            }}
+            className={inputClass}
+          />
+        </Field>
+
+        <Field id="email" label={texts.common.email} error={fieldErrors.email} max={FIELD_LIMITS.email} value={email}>
+          <input
+            {...fieldProps("email", fieldErrors.email)}
             type="email"
             autoComplete="email"
             required
+            maxLength={FIELD_LIMITS.email}
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              clear("email");
+            }}
             className={inputClass}
           />
-        </div>
+        </Field>
 
-        <div>
-          <label htmlFor="password" className={labelClass}>
-            {texts.common.password}
-          </label>
-          <PasswordInput id="password" autoComplete="new-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
-        </div>
+        <Field id="password" label={texts.common.password} error={fieldErrors.password}>
+          <PasswordInput
+            {...fieldProps("password", fieldErrors.password)}
+            autoComplete="new-password"
+            required
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              clear("password");
+            }}
+          />
+        </Field>
 
-        <div>
-          <label htmlFor="confirm" className={labelClass}>
-            {texts.register.confirmPassword}
-          </label>
-          <PasswordInput id="confirm" autoComplete="new-password" required value={confirm} onChange={(e) => setConfirm(e.target.value)} />
-        </div>
+        <Field id="confirm" label={texts.register.confirmPassword} error={fieldErrors.confirm}>
+          <PasswordInput
+            {...fieldProps("confirm", fieldErrors.confirm)}
+            autoComplete="new-password"
+            required
+            value={confirm}
+            onChange={(e) => {
+              setConfirm(e.target.value);
+              clear("confirm");
+            }}
+          />
+        </Field>
 
         <button type="submit" disabled={pending} className={primaryButtonClass}>
           {pending ? texts.common.loading : texts.register.submit}

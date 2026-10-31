@@ -2,7 +2,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { texts } from "../../lib/auth/texts";
 import { deleteUsers } from "./db";
-import { formError } from "./helpers";
+import { fieldError, formError } from "./helpers";
 import { now, waitForLink } from "./mail";
 
 const stamp = Date.now();
@@ -29,17 +29,29 @@ async function fillRegister(page: Page, u: { name: string; email: string; passwo
 test("B.1 campi vuoti ed email non valida: messaggi nel form", async ({ page }) => {
   await page.goto("/auth/register");
   await page.getByRole("button", { name: texts.register.submit, exact: true }).click();
-  await expect(formError(page)).toHaveText(texts.validation.name);
+  // Ogni campo sbagliato ha il suo errore sotto, e il focus va al primo
+  await expect(fieldError(page, "name")).toHaveText(texts.validation.name);
+  await expect(fieldError(page, "email")).toHaveText(texts.validation.email);
+  await expect(page.locator("#name")).toBeFocused();
+  await expect(page.locator("#name")).toHaveAttribute("aria-invalid", "true");
+
+  // Lo stesso errore ripetuto ricompare ogni volta
+  await page.locator("#name").fill("Mario");
+  await expect(fieldError(page, "name")).toHaveCount(0);
+  await page.locator("#name").fill("");
+  await page.getByRole("button", { name: texts.register.submit, exact: true }).click();
+  await expect(fieldError(page, "name")).toHaveText(texts.validation.name);
 
   await page.locator("#name").fill("Mario");
   await page.locator("#email").fill("non-una-email");
   await page.getByRole("button", { name: texts.register.submit, exact: true }).click();
-  await expect(formError(page)).toHaveText(texts.validation.email);
+  await expect(fieldError(page, "email")).toHaveText(texts.validation.email);
+  await expect(fieldError(page, "name")).toHaveCount(0);
 });
 
 test("B.2 password e conferma diverse", async ({ page }) => {
   await fillRegister(page, newUser("mismatch"), "Diversa-pass-1");
-  await expect(formError(page)).toHaveText(texts.register.passwordMismatch);
+  await expect(fieldError(page, "confirm")).toHaveText(texts.register.passwordMismatch);
 });
 
 test("B.3 ogni regola della password mancante è segnalata", async ({ page }) => {
@@ -50,7 +62,7 @@ test("B.3 ogni regola della password mancante è segnalata", async ({ page }) =>
     ["Bella1pass", texts.password.special],
   ] as const) {
     await fillRegister(page, { ...newUser("policy"), password: pwd });
-    await expect(formError(page)).toHaveText(msg);
+    await expect(fieldError(page, "password")).toHaveText(msg);
   }
 });
 

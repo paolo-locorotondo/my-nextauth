@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { FormMessage, inputClass, labelClass, linkClass, secondaryButtonClass } from "@/components/auth/ui";
+import Field, { fieldProps, focusFirstError } from "@/components/auth/Field";
+import { FormMessage, inputClass, linkClass, secondaryButtonClass } from "@/components/auth/ui";
 import { authClient } from "@/lib/auth/client";
-import { AUTH_ROUTES } from "@/lib/auth/config";
+import { AUTH_ROUTES, FIELD_LIMITS } from "@/lib/auth/config";
 import { clientErrorMessage } from "@/lib/auth/errors";
 import { emailSchema } from "@/lib/auth/password-policy";
 import { continueUrl } from "@/lib/auth/safe-redirect";
@@ -15,15 +16,18 @@ export default function ResendVerification({ initialEmail, callbackUrl }: { init
   const [pending, setPending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState("");
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError(null);
     if (!emailSchema.safeParse(email).success) {
-      setError(texts.validation.email);
+      setEmailError(texts.validation.email);
+      focusFirstError(["email"], { email: texts.validation.email });
       return;
     }
+    setEmailError("");
     setPending(true);
-    setError(null);
     const { error } = await authClient.sendVerificationEmail({ email, callbackURL: continueUrl(callbackUrl) });
     setPending(false);
     if (error) {
@@ -39,20 +43,21 @@ export default function ResendVerification({ initialEmail, callbackUrl }: { init
         <FormMessage kind="error">{error}</FormMessage>
         <FormMessage kind="success">{sent ? texts.verifyEmail.resent : null}</FormMessage>
         {!initialEmail && (
-          <div>
-            <label htmlFor="email" className={labelClass}>
-              {texts.common.email}
-            </label>
+          <Field id="email" label={texts.common.email} error={emailError} max={FIELD_LIMITS.email} value={email}>
             <input
-              id="email"
+              {...fieldProps("email", emailError)}
               type="email"
               autoComplete="email"
               required
+              maxLength={FIELD_LIMITS.email}
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setEmailError("");
+              }}
               className={inputClass}
             />
-          </div>
+          </Field>
         )}
         <button type="submit" disabled={pending} className={secondaryButtonClass}>
           {pending ? texts.common.loading : texts.verifyEmail.resend}

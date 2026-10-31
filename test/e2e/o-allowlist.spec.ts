@@ -83,12 +83,12 @@ test("O.4 e O.5 gestione voci: aggiunta, voci malformate e duplicato", async ({ 
 
   for (const bad of ["foo", "@", "a@b@c", "@dominio"]) {
     await addEntry(page, bad);
-    await expect(formError(page)).toBeVisible();
+    await expect(page.locator("#ae-pattern-error")).toBeVisible();
     await expect(entryRow(page, bad)).toHaveCount(0);
   }
 
   await addEntry(page, DOMAIN, E2E_NOTE);
-  await expect(formError(page)).toHaveText("Questa voce è già in lista");
+  await expect(page.locator("#ae-pattern-error")).toHaveText("Questa voce è già in lista");
 });
 
 test("O.6 registrazione dentro il dominio ammesso va avanti, fuori dominio no", async ({ page }) => {
@@ -168,4 +168,46 @@ test("O.11 modifica di una voce: la nota si aggiorna; cambiando il dominio perde
   await s.page.goto("/dashboard");
   await expect(s.page).toHaveURL(/\/auth\/login/);
   await s.context.close();
+});
+
+test("O.12 telefono: Rimuovi chiede la conferma inline (Sì, rimuovi / Annulla), senza popup del browser", async ({ browser, baseURL }) => {
+  const dominio = `@mob-${stamp}.example.com`;
+  addAllowed(dominio, E2E_NOTE);
+  const context = await browser.newContext({ baseURL, viewport: { width: 375, height: 812 } });
+  const page = await context.newPage();
+  let popup = false;
+  page.on("dialog", (d) => {
+    popup = true;
+    void d.dismiss();
+  });
+  await login(page, ADMIN.email, ADMIN.password, "/admin/allowed-emails");
+
+  const card = page.getByRole("listitem").filter({ hasText: dominio });
+  await card.getByRole("button", { name: `Rimuovi ${dominio}`, exact: true }).click();
+  await expect(card.getByRole("group", { name: `Conferma eliminazione di ${dominio}` })).toBeVisible();
+
+  await card.getByRole("button", { name: "Annulla", exact: true }).click();
+  await expect(card).toBeVisible();
+  await expect(card.getByRole("button", { name: `Rimuovi ${dominio}`, exact: true })).toBeVisible();
+
+  await card.getByRole("button", { name: `Rimuovi ${dominio}`, exact: true }).click();
+  await card.getByRole("button", { name: `Sì, rimuovi ${dominio}`, exact: true }).click();
+  await expect(page.getByRole("listitem").filter({ hasText: dominio })).toHaveCount(0);
+  expect(popup).toBe(false);
+  await context.close();
+});
+
+test("O.13 voce vuota: errore sotto il campo, e ricompare se si ripete", async ({ page }) => {
+  await login(page, ADMIN.email, ADMIN.password, "/admin/allowed-emails");
+  const aggiungi = page.getByRole("button", { name: "Aggiungi", exact: true });
+  await aggiungi.click();
+  await expect(page.locator("#ae-pattern-error")).toBeVisible();
+  await expect(page.locator("#ae-pattern")).toBeFocused();
+  await expect(page.locator("#ae-pattern")).toHaveAttribute("aria-invalid", "true");
+
+  await page.locator("#ae-pattern").fill("x");
+  await expect(page.locator("#ae-pattern-error")).toHaveCount(0);
+  await page.locator("#ae-pattern").fill("");
+  await aggiungi.click();
+  await expect(page.locator("#ae-pattern-error")).toBeVisible();
 });

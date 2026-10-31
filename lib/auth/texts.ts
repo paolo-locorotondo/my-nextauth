@@ -101,6 +101,8 @@ export const texts = {
   validation: {
     email: "Inserisci un indirizzo email valido",
     name: "Inserisci il tuo nome",
+    password: "Inserisci la password",
+    currentPassword: "Inserisci la password attuale",
   },
   /** Codici di errore di Better Auth (API e redirect OAuth) → messaggio. */
   errors: {

@@ -6,7 +6,7 @@ import { DismissibleAlert } from "./DismissibleAlert";
 // text-base (16px) negli input: sotto questa soglia Safari su iPhone zooma da solo al focus.
 // min-h-11 (44px) sui pulsanti: dimensione minima consigliata per il tocco.
 export const inputClass =
-  "mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-base text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20";
+  "mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-base text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 aria-[invalid=true]:border-red-500";
 export const labelClass = "block text-sm font-medium text-slate-700";
 export const primaryButtonClass =
   "min-h-11 w-full rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60";
@@ -100,8 +100,9 @@ export function FormMessage({ kind, children }: { kind: "error" | "success" | "i
     success: "border-green-200 bg-green-50 text-green-700",
     info: "border-blue-200 bg-blue-50 text-blue-700",
   }[kind];
-  // Gli errori si chiudono con la X; `key` riparte da zero quando cambia il testo
-  if (kind === "error") return <DismissibleAlert key={typeof children === "string" ? children : undefined}>{children}</DismissibleAlert>;
+  // Gli errori si chiudono con la X. Niente key sul testo: i form azzerano l'errore a ogni invio,
+  // il riquadro si smonta e un errore ripetuto riappare. Gli errori di un campo vanno sotto il campo (Field).
+  if (kind === "error") return <DismissibleAlert>{children}</DismissibleAlert>;
   return (
     <div role="status" className={`rounded-lg border px-3 py-2 text-sm ${styles}`}>
       {children}

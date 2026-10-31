@@ -4,10 +4,12 @@ import Link from "next/link";
 import { useState } from "react";
 import PasswordInput from "@/components/auth/PasswordInput";
 import ProviderButtons, { type ProviderButtonsProps } from "@/components/auth/ProviderButtons";
-import { AuthCard, FormMessage, inputClass, labelClass, linkClass, primaryButtonClass } from "@/components/auth/ui";
+import Field, { fieldProps, focusFirstError } from "@/components/auth/Field";
+import { AuthCard, FormMessage, inputClass, linkClass, primaryButtonClass } from "@/components/auth/ui";
 import { authClient } from "@/lib/auth/client";
-import { AUTH_ROUTES } from "@/lib/auth/config";
+import { AUTH_ROUTES, FIELD_LIMITS } from "@/lib/auth/config";
 import { clientErrorMessage } from "@/lib/auth/errors";
+import { emailSchema } from "@/lib/auth/password-policy";
 import { continueUrl } from "@/lib/auth/safe-redirect";
 import { texts } from "@/lib/auth/texts";
 
@@ -22,12 +24,22 @@ export default function LoginForm({ providers, callbackUrl, notice }: Props) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [unverified, setUnverified] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const clear = (k: string) => setFieldErrors((f) => (f[k] ? { ...f, [k]: "" } : f));
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setPending(true);
     setError(null);
     setUnverified(false);
+    const invalid: Record<string, string> = {};
+    if (!emailSchema.safeParse(email).success) invalid.email = texts.validation.email;
+    if (!password) invalid.password = texts.validation.password;
+    setFieldErrors(invalid);
+    if (Object.keys(invalid).length > 0) {
+      focusFirstError(["email", "password"], invalid);
+      return;
+    }
+    setPending(true);
 
     const { error } = await authClient.signIn.email({
       email,
@@ -74,32 +86,35 @@ export default function LoginForm({ providers, callbackUrl, notice }: Props) {
           )}
         </FormMessage>
 
-        <div>
-          <label htmlFor="email" className={labelClass}>
-            {texts.common.email}
-          </label>
+        <Field id="email" label={texts.common.email} error={fieldErrors.email} max={FIELD_LIMITS.email} value={email}>
           <input
-            id="email"
+            {...fieldProps("email", fieldErrors.email)}
             type="email"
             autoComplete="email"
             required
+            maxLength={FIELD_LIMITS.email}
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              clear("email");
+            }}
             className={inputClass}
           />
-        </div>
+        </Field>
 
         <div>
-          <label htmlFor="password" className={labelClass}>
-            {texts.common.password}
-          </label>
-          <PasswordInput
-            id="password"
-            autoComplete="current-password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+          <Field id="password" label={texts.common.password} error={fieldErrors.password}>
+            <PasswordInput
+              {...fieldProps("password", fieldErrors.password)}
+              autoComplete="current-password"
+              required
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                clear("password");
+              }}
+            />
+          </Field>
           <p className="mt-2 text-right text-sm">
             <Link href={AUTH_ROUTES.forgotPassword} className="text-blue-600 hover:underline">
               {texts.login.forgotPassword}

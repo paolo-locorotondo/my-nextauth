@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { AuthCard, FormMessage, inputClass, labelClass, linkClass, primaryButtonClass } from "@/components/auth/ui";
+import Field, { fieldProps, focusFirstError } from "@/components/auth/Field";
+import { AuthCard, FormMessage, inputClass, linkClass, primaryButtonClass } from "@/components/auth/ui";
 import { authClient } from "@/lib/auth/client";
-import { AUTH_ROUTES } from "@/lib/auth/config";
+import { AUTH_ROUTES, FIELD_LIMITS } from "@/lib/auth/config";
 import { clientErrorMessage } from "@/lib/auth/errors";
 import { emailSchema } from "@/lib/auth/password-policy";
 import { texts } from "@/lib/auth/texts";
@@ -14,15 +15,18 @@ export default function ForgotPasswordPage() {
   const [pending, setPending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState("");
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError(null);
     if (!emailSchema.safeParse(email).success) {
-      setError(texts.validation.email);
+      setEmailError(texts.validation.email);
+      focusFirstError(["email"], { email: texts.validation.email });
       return;
     }
+    setEmailError("");
     setPending(true);
-    setError(null);
 
     // La risposta è identica che l'email esista o no (niente user enumeration)
     const { error } = await authClient.requestPasswordReset({ email, redirectTo: AUTH_ROUTES.resetPassword });
@@ -41,20 +45,21 @@ export default function ForgotPasswordPage() {
       ) : (
         <form onSubmit={onSubmit} className="space-y-4" noValidate>
           <FormMessage kind="error">{error}</FormMessage>
-          <div>
-            <label htmlFor="email" className={labelClass}>
-              {texts.common.email}
-            </label>
+          <Field id="email" label={texts.common.email} error={emailError} max={FIELD_LIMITS.email} value={email}>
             <input
-              id="email"
+              {...fieldProps("email", emailError)}
               type="email"
               autoComplete="email"
               required
+              maxLength={FIELD_LIMITS.email}
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setEmailError("");
+              }}
               className={inputClass}
             />
-          </div>
+          </Field>
           <button type="submit" disabled={pending} className={primaryButtonClass}>
             {pending ? texts.common.loading : texts.forgotPassword.submit}
           </button>

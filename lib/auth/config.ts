@@ -49,6 +49,9 @@ export function landingForRole(role: string | null | undefined): string {
  */
 export const PROTECTED_PREFIXES: readonly string[] = ["/dashboard", "/admin", "/user", "/api/demo"];
 
+/** Lunghezze massime dei campi di testo dei form di autenticazione (con contatore). */
+export const FIELD_LIMITS = { name: 100, email: 254 } as const;
+
 /** Regole password (stesse di order-app). Applicate lato client e lato server. */
 export const PASSWORD_POLICY = {
   min: 8,
