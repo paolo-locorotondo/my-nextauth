@@ -1,18 +1,16 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { DeleteButton, RowActions } from "@/components/auth/ui";
+import { DeleteConfirm } from "@/components/auth/DeleteConfirm";
+import { RowActions } from "@/components/auth/ui";
 import { deleteUser } from "./actions";
 
 export default function DeleteUserButton({ userId, email }: { userId: string; email: string }) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  function onClick() {
-    const ok = window.confirm(
-      `Eliminare ${email}?\n\nVengono cancellati anche i suoi account (email, Google, SSO), le sessioni aperte e i token di reset pendenti. L'operazione non è reversibile.`,
-    );
-    if (!ok) return;
+  function onConfirm() {
+    setError(null);
     startTransition(async () => {
       const r = await deleteUser(userId);
       setError(r.ok ? null : r.error);
@@ -21,9 +19,13 @@ export default function DeleteUserButton({ userId, email }: { userId: string; em
 
   return (
     <RowActions error={error}>
-      <DeleteButton onClick={onClick} disabled={isPending} label={`Elimina ${email}`} compact>
-        {isPending ? "Elimino…" : "Elimina"}
-      </DeleteButton>
+      <DeleteConfirm
+        name={email}
+        onConfirm={onConfirm}
+        disabled={isPending}
+        compact
+        notice="Eliminare? Cancella anche i suoi account (email, Google, SSO), le sessioni e i token di reset. Non si può annullare."
+      />
     </RowActions>
   );
 }

@@ -112,3 +112,31 @@ test("I.9 telefono 375px: schede senza scroll orizzontale", async ({ page }) => 
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(0);
 });
+
+test("I.9 telefono: Elimina utente chiede la conferma inline (Sì, elimina / Annulla), senza popup", async ({ browser, baseURL, request }) => {
+  const email = `i9-${stamp}@example.com`;
+  await createUser(request, baseURL!, email, "USER", "I9");
+  const context = await browser.newContext({ baseURL, viewport: { width: 375, height: 812 } });
+  const page = await context.newPage();
+  let popup = false;
+  page.on("dialog", (d) => {
+    popup = true;
+    void d.dismiss();
+  });
+  try {
+    await login(page, ADMIN.email, ADMIN.password, "/admin/users");
+    const card = page.getByRole("listitem").filter({ hasText: email });
+    await card.getByRole("button", { name: `Elimina ${email}`, exact: true }).click();
+    await expect(card.getByRole("group", { name: `Conferma eliminazione di ${email}` })).toContainText("sessioni");
+    await card.getByRole("button", { name: "Annulla", exact: true }).click();
+    await expect(card).toBeVisible();
+
+    await card.getByRole("button", { name: `Elimina ${email}`, exact: true }).click();
+    await card.getByRole("button", { name: `Sì, elimina ${email}`, exact: true }).click();
+    await expect(page.getByRole("listitem").filter({ hasText: email })).toHaveCount(0);
+    expect(popup).toBe(false);
+  } finally {
+    await context.close();
+    deleteUsers([email]);
+  }
+});
